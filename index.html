@@ -1,0 +1,3138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EndoCenter</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#08090c;--s1:#0f1117;--s2:#161b24;--s3:#1e2533;--border:#252d3d;--border2:#2e3a4e;
+  --accent:#4f9eff;--green:#2dd4a0;--warn:#f5a623;--danger:#ff4f6d;--purple:#9b71f5;--cyan:#22d3ee;
+  --text:#e8edf5;--text2:#8896aa;--text3:#4a5568;
+  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+
+/* LOGIN */
+.login-screen{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;}
+.login-box{background:var(--s1);border:1px solid var(--border);border-radius:20px;padding:44px;width:420px;max-width:95vw;}
+.login-logo{font-family:var(--mono);font-size:22px;font-weight:500;color:var(--accent);margin-bottom:4px;}
+.login-sub{color:var(--text3);font-size:13px;margin-bottom:28px;}
+.lf{margin-bottom:14px;}
+.lf label{display:block;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:5px;}
+.lf input{background:var(--s2);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;font-size:13px;font-family:var(--font);width:100%;outline:none;}
+.lf input:focus{border-color:var(--accent);}
+.err-msg{color:var(--danger);font-size:12px;margin-top:8px;display:none;}
+
+/* CFG */
+.cfg-screen{position:fixed;inset:0;background:var(--bg);z-index:998;display:none;align-items:center;justify-content:center;}
+.cfg-screen.open{display:flex;}
+.cfg-box{background:var(--s1);border:1px solid var(--border);border-radius:20px;padding:40px;width:500px;max-width:95vw;}
+.cfg-steps{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:20px;font-size:11px;color:var(--text2);line-height:2;}
+.cfg-steps b{color:var(--accent);}
+.cfg-steps a{color:var(--cyan);text-decoration:none;}
+.cfg-f{margin-bottom:12px;}
+.cfg-f label{display:block;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:5px;}
+.cfg-f input{background:var(--s2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:7px;font-size:12px;font-family:var(--mono);width:100%;outline:none;}
+.cfg-f input:focus{border-color:var(--accent);}
+
+/* HEADER */
+.header{height:52px;background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.logo{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--accent);}
+.logo em{color:var(--text3);font-style:normal;}
+.sync{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--text3);}
+.sync-dot.ok{background:var(--green);}.sync-dot.saving{background:var(--warn);animation:blink 1s infinite;}
+.sync-dot.err{background:var(--danger);}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.user-chip{display:flex;align-items:center;gap:7px;background:var(--s2);border:1px solid var(--border);border-radius:20px;padding:4px 12px 4px 6px;font-size:12px;cursor:pointer;}
+.uavatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;background:rgba(79,158,255,.2);color:var(--accent);}
+
+/* LAYOUT */
+.app-wrap{display:flex;height:calc(100vh - 52px);}
+.sidebar{width:200px;background:var(--s1);border-right:1px solid var(--border);padding:12px 0;flex-shrink:0;overflow-y:auto;}
+.main{flex:1;overflow-y:auto;}
+.nav-sec{font-size:9px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--text3);padding:10px 16px 4px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:7px 16px;cursor:pointer;color:var(--text2);font-size:12px;border-left:2px solid transparent;transition:all .12s;}
+.nav-item:hover{color:var(--text);background:var(--s2);}
+.nav-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(79,158,255,.06);}
+.nav-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;min-width:16px;text-align:center;}
+
+/* PAGES */
+.page{display:none;padding:20px;}.page.active{display:block;}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap;}
+.ph-title{font-size:18px;font-weight:600;}
+.ph-sub{font-size:12px;color:var(--text3);margin-top:2px;}
+
+/* BUTTONS */
+.btn{padding:7px 14px;border-radius:7px;border:none;cursor:pointer;font-family:var(--font);font-size:12px;font-weight:500;transition:all .12s;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary{background:var(--accent);color:#000;font-weight:600;}
+.btn-secondary{background:var(--s2);color:var(--text);border:1px solid var(--border);}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border);}
+.btn-danger{background:rgba(255,79,109,.12);color:var(--danger);border:1px solid rgba(255,79,109,.25);}
+.btn-green{background:rgba(45,212,160,.15);color:var(--green);border:1px solid rgba(45,212,160,.3);}
+.btn-warn{background:rgba(245,166,35,.15);color:var(--warn);border:1px solid rgba(245,166,35,.3);}
+.btn-sm{padding:4px 10px;font-size:11px;}.btn-xs{padding:2px 8px;font-size:10px;}
+
+/* CARDS */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px;}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.card-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:8px;}
+.card-val{font-family:var(--mono);font-size:24px;font-weight:500;line-height:1;}
+.card-sub{font-size:10px;color:var(--text3);margin-top:3px;}
+.c-blue .card-val{color:var(--accent);}.c-green .card-val{color:var(--green);}
+.c-warn .card-val{color:var(--warn);}.c-red .card-val{color:var(--danger);}
+.c-purple .card-val{color:var(--purple);}.c-cyan .card-val{color:var(--cyan);}
+
+/* TABLE */
+.tw{background:var(--s1);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+th{background:var(--s2);padding:8px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:9px 12px;border-bottom:1px solid rgba(37,45,61,.6);vertical-align:middle;font-size:12px;}
+tr:last-child td{border-bottom:none;}
+tr.cr:hover td{background:rgba(255,255,255,.015);cursor:pointer;}
+.tf{padding:7px 12px;font-size:10px;color:var(--text3);border-top:1px solid var(--border);display:flex;justify-content:space-between;}
+.row-late td{border-left:2px solid var(--warn)!important;}
+
+/* CHIPS */
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:500;white-space:nowrap;}
+.chip::before{content:'●';font-size:7px;}
+/* cotação stages */
+.st-cotacao{background:rgba(34,211,238,.1);color:var(--cyan);}
+.st-aprovacao{background:rgba(245,166,35,.1);color:var(--warn);}
+.st-autorizado{background:rgba(45,212,160,.1);color:var(--green);}
+.st-negado{background:rgba(255,79,109,.1);color:var(--danger);}
+.st-faturado{background:rgba(155,113,245,.1);color:var(--purple);}
+.st-pago{background:rgba(45,212,160,.15);color:var(--green);}
+/* mapa */
+.mc-eletivo{background:rgba(79,158,255,.1);color:var(--accent);}
+.mc-urgencia{background:rgba(255,79,109,.1);color:var(--danger);}
+.mc-cancelado{background:rgba(74,85,104,.15);color:var(--text3);}
+.mc-realizado{background:rgba(45,212,160,.1);color:var(--green);}
+/* canal */
+.canal-chip{font-size:9px;padding:1px 6px;border-radius:4px;font-weight:600;text-transform:uppercase;}
+.cc-whats{background:rgba(37,211,102,.15);color:#25d366;}
+.cc-email{background:rgba(79,158,255,.15);color:var(--accent);}
+.cc-tel{background:rgba(245,166,35,.15);color:var(--warn);}
+.cc-portal{background:rgba(155,113,245,.15);color:var(--purple);}
+.cc-vend{background:rgba(34,211,238,.15);color:var(--cyan);}
+.cc-med{background:rgba(45,212,160,.15);color:var(--green);}
+
+/* TIMER */
+.timer{display:inline-flex;align-items:center;gap:3px;font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:4px;}
+.t-ok{background:rgba(45,212,160,.1);color:var(--green);border:1px solid rgba(45,212,160,.2);}
+.t-warn{background:rgba(245,166,35,.1);color:var(--warn);border:1px solid rgba(245,166,35,.2);}
+.t-bad{background:rgba(255,79,109,.1);color:var(--danger);border:1px solid rgba(255,79,109,.2);}
+.t-done{background:rgba(74,85,104,.1);color:var(--text3);border:1px solid var(--border);}
+
+/* ITEMS TABLE */
+.itbl{width:100%;border-collapse:collapse;font-size:11px;}
+.itbl th{background:var(--s3);padding:5px 7px;text-align:left;font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border);}
+.itbl td{padding:4px 6px;border-bottom:1px solid rgba(37,45,61,.4);vertical-align:middle;}
+.itbl input,.itbl select{background:var(--s3);border:1px solid var(--border);color:var(--text);padding:3px 6px;border-radius:4px;font-size:11px;font-family:var(--mono);width:100%;outline:none;}
+.itbl input:focus,.itbl select:focus{border-color:var(--accent);}
+.itbl input[type=number]{text-align:right;}
+.itbl input:disabled,.itbl select:disabled{opacity:.5;}
+.itbl-phase{background:rgba(79,158,255,.04);border-top:2px solid rgba(79,158,255,.2);}
+.itbl-phase th{background:rgba(79,158,255,.08);color:var(--accent);}
+.itbl-phase2{background:rgba(45,212,160,.04);border-top:2px solid rgba(45,212,160,.2);}
+.itbl-phase2 th{background:rgba(45,212,160,.08);color:var(--green);}
+.items-total{display:flex;justify-content:flex-end;gap:16px;margin-top:8px;padding:8px 0;border-top:1px solid var(--border);}
+.it-sum{text-align:right;}
+.it-sum-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;}
+.it-sum-val{font-family:var(--mono);font-size:14px;font-weight:600;}
+
+/* FILTERS */
+.filters{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+.fi,.fs{background:var(--s1);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-size:12px;font-family:var(--font);outline:none;}
+.fi:focus,.fs:focus{border-color:var(--accent);}
+.fs option{background:var(--s2);}
+.export-bar{display:flex;gap:8px;margin-bottom:12px;justify-content:flex-end;}
+
+/* OVERLAY */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:300;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+.overlay.open{display:flex;}
+.panel{background:var(--s1);border:1px solid var(--border);border-radius:14px;width:820px;max-width:96vw;max-height:92vh;overflow-y:auto;animation:su .18s ease;}
+@keyframes su{from{transform:translateY(16px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.panel-hdr{padding:20px 24px 0;display:flex;justify-content:space-between;align-items:center;}
+.panel-hdr h2{font-size:15px;font-weight:600;}
+.panel-body{padding:20px 24px;}
+.panel-foot{display:flex;gap:8px;justify-content:flex-end;padding:14px 24px;border-top:1px solid var(--border);}
+.fsec{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+.fsec:last-child{border-bottom:none;margin-bottom:0;}
+.fsec-title{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;}
+.frow{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;}
+.fg{display:flex;flex-direction:column;gap:4px;}.fg.full{grid-column:1/-1;}
+.fg label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);}
+.fg input,.fg select,.fg textarea{background:var(--s2);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:6px;font-size:12px;font-family:var(--font);outline:none;width:100%;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent);}
+.fg input:disabled,.fg select:disabled,.fg textarea:disabled{opacity:.5;cursor:not-allowed;}
+.fg select option{background:var(--bg);}
+.fg textarea{resize:vertical;min-height:60px;}
+.rrow{display:flex;gap:14px;padding:6px 0;flex-wrap:wrap;}
+.rl{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:12px;color:var(--text);}
+.rl input[type=radio]{accent-color:var(--accent);width:auto;}
+.linked-cot{background:rgba(45,212,160,.06);border:1px solid rgba(45,212,160,.2);border-radius:8px;padding:12px;margin-top:8px;}
+.linked-cot-lbl{font-size:9px;color:var(--green);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;}
+
+/* DETAIL */
+.detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;display:none;justify-content:flex-end;backdrop-filter:blur(3px);}
+.detail-overlay.open{display:flex;}
+.detail-panel{background:var(--s1);border-left:1px solid var(--border);width:520px;max-width:96vw;height:100%;overflow-y:auto;padding:22px;animation:sr .18s ease;}
+@keyframes sr{from{transform:translateX(24px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+.df{display:flex;gap:8px;margin-bottom:8px;}
+.df-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;min-width:120px;padding-top:1px;flex-shrink:0;}
+.df-val{font-size:12px;color:var(--text);flex:1;}
+.tl{position:relative;padding:2px 0 2px 14px;}
+.tl::before{content:'';position:absolute;left:3px;top:0;bottom:0;width:2px;background:var(--border);}
+.tl-step{position:relative;margin-bottom:12px;}
+.tl-dot{position:absolute;left:-18px;top:3px;width:8px;height:8px;border-radius:50%;border:2px solid var(--border);background:var(--s1);}
+.tl-dot.done{background:var(--green);border-color:var(--green);}
+.tl-dot.active{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,158,255,.2);}
+.tl-dot.skip{background:var(--danger);border-color:var(--danger);}
+.tl-lbl{font-size:11px;font-weight:500;color:var(--text2);}.tl-lbl.done{color:var(--text);}.tl-lbl.active{color:var(--accent);}
+.tl-date{font-size:10px;color:var(--text3);margin-top:1px;}
+.tl-dur{font-family:var(--mono);font-size:9px;background:rgba(255,255,255,.04);color:var(--text3);padding:1px 4px;border-radius:3px;margin-left:5px;}
+
+/* USERS */
+.users-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;}
+.uc{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.uc-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.uc-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;}
+.uc-name{font-size:13px;font-weight:600;}
+.uc-role{font-size:10px;color:var(--text3);}
+
+/* MAPA CARDS */
+.mapa-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;}
+.mc{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;border-left:3px solid var(--border);transition:border-color .12s;}
+.mc:hover{border-color:var(--border2);}
+.mc.el{border-left-color:var(--accent);}
+.mc.urg{border-left-color:var(--danger);}
+.mc.can{border-left-color:var(--text3);opacity:.6;}
+.mc.real{border-left-color:var(--green);}
+
+/* MISC */
+.empty{text-align:center;padding:48px 20px;color:var(--text3);}
+.empty-icon{font-size:32px;margin-bottom:10px;}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--s2);border:1px solid var(--border);border-left:3px solid var(--green);padding:10px 16px;border-radius:8px;font-size:12px;z-index:999;display:none;}
+.toast.show{display:block;}
+.xbtn{background:none;border:none;color:var(--text2);cursor:pointer;font-size:17px;line-height:1;}
+.id-tag{font-family:var(--mono);font-size:10px;color:var(--text3);background:var(--s2);padding:2px 6px;border-radius:4px;}
+.money{font-family:var(--mono);font-size:11px;}
+.m-green{color:var(--green);}.m-warn{color:var(--warn);}
+.section-box{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px;}
+.section-box-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px;}
+::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+/* STATUS COLORS MAPA */
+.mc.hoje { border-left-color: #4f9eff !important; background: rgba(79,158,255,.04); }
+.mc.amanha { border-left-color: #4a5568 !important; }
+.mc.cancelada { border-left-color: #ff4f6d !important; }
+.mc.adiada { border-left-color: #f5a623 !important; background: rgba(245,166,35,.04); }
+.mc.realizada { border-left-color: #9b71f5 !important; background: rgba(155,113,245,.04); }
+.mc.ag-fat { border-left-color: #f5a623 !important; background: rgba(245,166,35,.06); }
+.mc.faturada { border-left-color: #2dd4a0 !important; background: rgba(45,212,160,.04); }
+.status-hoje { background: rgba(79,158,255,.15); color: #4f9eff; font-size:10px; padding:2px 7px; border-radius:10px; font-weight:600; }
+.status-amanha { background: rgba(74,85,104,.15); color: #8896aa; font-size:10px; padding:2px 7px; border-radius:10px; font-weight:600; }
+.status-cancelada { background: rgba(255,79,109,.15); color: #ff4f6d; font-size:10px; padding:2px 7px; border-radius:10px; font-weight:600; }
+.status-adiada { background: rgba(245,166,35,.15); color: #f5a623; font-size:10px; padding:2px 7px; border-radius:10px; font-weight:600; }
+.status-realizada { background: rgba(155,113,245,.15); color: #9b71f5; font-size:10px; padding:2px 7px; border-radius:10px; font-weight:600; }
+.status-ag-fat { background: rgba(245,166,35,.2); color: #f5a623; font-size:10px; padding:2px 7px; border-radius:10px; font-weight:600; border:1px solid rgba(245,166,35,.3); }
+.status-faturada { background: rgba(45,212,160,.15); color: #2dd4a0; font-size:10px; padding:2px 7px; border-radius:10px; font-weight:600; }
+
+/* DAYS COUNTER */
+.days-counter { display:inline-flex; align-items:center; gap:5px; font-family:var(--mono); font-size:12px; padding:3px 10px; border-radius:6px; font-weight:600; }
+.dc-ok { background:rgba(45,212,160,.1); color:var(--green); border:1px solid rgba(45,212,160,.2); }
+.dc-warn { background:rgba(245,166,35,.1); color:var(--warn); border:1px solid rgba(245,166,35,.2); }
+.dc-bad { background:rgba(255,79,109,.1); color:var(--danger); border:1px solid rgba(255,79,109,.2); }
+.dc-done { background:rgba(74,85,104,.1); color:var(--text3); border:1px solid var(--border); }
+
+/* AUTOCOMPLETE */
+.ac-wrap { position:relative; }
+.ac-list { position:absolute; top:100%; left:0; right:0; background:var(--s2); border:1px solid var(--accent); border-top:none; border-radius:0 0 6px 6px; max-height:180px; overflow-y:auto; z-index:500; display:none; } td .ac-list { left:0 !important; right:auto !important; width:420px !important; min-width:420px !important; max-height:260px !important; font-size:13px !important; box-shadow:0 8px 24px rgba(0,0,0,0.4) !important; z-index:9999 !important; } td .ac-item { padding:8px 10px !important; line-height:1.5 !important; }
+.ac-list.open { display:block; }
+.ac-item { padding:7px 10px; font-size:12px; cursor:pointer; border-bottom:1px solid var(--border); }
+.ac-item:last-child { border-bottom:none; }
+.ac-item:hover { background:var(--s3); color:var(--accent); }
+.ac-item span { font-size:10px; color:var(--text3); margin-left:6px; }
+
+/* LOG */
+.log-item { display:flex; gap:10px; padding:8px 0; border-bottom:1px solid rgba(37,45,61,.5); font-size:11px; }
+.log-item:last-child { border-bottom:none; }
+.log-time { color:var(--text3); font-family:var(--mono); white-space:nowrap; min-width:120px; }
+.log-user { color:var(--accent); font-weight:600; min-width:80px; }
+.log-action { color:var(--text2); flex:1; }
+
+/* PARAM BADGE */
+.param-badge { display:inline-flex; align-items:center; gap:4px; background:rgba(79,158,255,.1); border:1px solid rgba(79,158,255,.2); border-radius:6px; padding:3px 10px; font-size:11px; color:var(--accent); cursor:pointer; }
+.param-badge:hover { background:rgba(79,158,255,.2); }
+
+/* CADASTROS PAGE */
+.cad-tabs { display:flex; gap:2px; background:var(--s2); border:1px solid var(--border); border-radius:8px; padding:3px; width:fit-content; margin-bottom:16px; }
+.cad-tab { padding:5px 16px; border-radius:6px; font-size:12px; cursor:pointer; color:var(--text2); }
+.cad-tab.active { background:var(--s3); color:var(--text); font-weight:500; }
+
+/* ═══════════════════════════════════════════════════════
+   MOBILE RESPONSIVO — Mapa, Cotações, Expedição
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* Layout geral */
+  .app-wrap { flex-direction: column; height: auto; }
+  .main { overflow-y: visible; }
+  .page { padding: 12px 10px; }
+
+  /* Header */
+  .header { padding: 0 12px; }
+  .logo em { display: none; }
+  .sync span { display: none; }
+
+  /* Sidebar → Bottom Nav no mobile */
+  .sidebar {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    padding: 4px 0;
+    order: 2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--s1);
+    z-index: 90;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  .main { order: 1; padding-bottom: 80px; }
+  .nav-sec { display: none; }
+  .nav-item {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px;
+    font-size: 9px;
+    border-left: none;
+    border-top: 2px solid transparent;
+    gap: 3px;
+    min-width: 60px;
+    flex: 1;
+  }
+  .nav-item.active {
+    border-left-color: transparent;
+    border-top-color: var(--accent);
+  }
+  .nav-item span { font-size: 16px; }
+  .nav-badge { margin-left: 0; margin-top: -4px; position: absolute; }
+
+  /* Cards do dashboard */
+  .cards { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .card-val { font-size: 18px; }
+
+  /* Page header */
+  .ph { flex-direction: column; gap: 8px; margin-bottom: 14px; }
+  .ph > div:last-child { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* Filtros — empilhar em mobile */
+  .fi { width: 100% !important; }
+  .mf { flex-direction: column; gap: 6px; }
+
+  /* ── MAPA CIRÚRGICO ── */
+  /* Tabela do mapa: cards em vez de linhas */
+  #mapa-table-wrap { display: none; }
+  #mapa-cards { display: block !important; }
+
+  /* ── TABELAS GERAIS ── */
+  /* Scroll horizontal nas tabelas */
+  .tw { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { min-width: 500px; }
+  th, td { padding: 7px 8px; font-size: 11px; }
+
+  /* ── OVERLAYS / MODAIS ── */
+  .overlay .panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    border-radius: 16px 16px 0 0 !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    max-height: 92vh !important;
+    overflow-y: auto !important;
+  }
+  .overlay { align-items: flex-end !important; }
+  .panel-body { padding: 14px !important; }
+  .panel-hdr { padding: 12px 14px !important; }
+
+  /* Formulários */
+  .frow { flex-direction: column !important; gap: 8px !important; }
+  .fg { min-width: 100% !important; width: 100% !important; }
+  .fg.full { min-width: 100% !important; }
+
+  /* Tabela de itens do mapa/cotação */
+  #mapa-items-tbody td,
+  #cot-items-tbody td { padding: 5px 4px; }
+  #mapa-items-tbody input,
+  #cot-items-tbody input { font-size: 11px; padding: 4px 5px; }
+
+  /* Botões — maiores para toque */
+  .btn { padding: 9px 14px; font-size: 12px; }
+  .btn-sm { padding: 7px 10px; font-size: 11px; }
+
+  /* ── EXPEDIÇÃO ── */
+  #exp-table th:nth-child(4),
+  #exp-table td:nth-child(4),
+  #exp-table th:nth-child(5),
+  #exp-table td:nth-child(5) { display: none; }
+
+  /* ── COTAÇÕES ── */
+  #cot-table th:nth-child(5),
+  #cot-table td:nth-child(5),
+  #cot-table th:nth-child(6),
+  #cot-table td:nth-child(6) { display: none; }
+
+  /* Chips menores */
+  .chip { font-size: 9px; padding: 2px 6px; }
+}
+
+@media (max-width: 768px) {
+  /* Mapa cards view */
+  #mapa-cards { display: flex; flex-direction: column; gap: 10px; }
+  .mapa-card {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    border-left: 3px solid var(--border2);
+  }
+  .mapa-card.hoje { border-left-color: var(--accent); }
+  .mapa-card.amanha { border-left-color: var(--border2); }
+  .mapa-card.cancelada { border-left-color: var(--danger); }
+  .mapa-card.adiada { border-left-color: var(--warn); }
+  .mapa-card.realizada { border-left-color: var(--purple); }
+  .mapa-card.faturada { border-left-color: var(--green); }
+  .mapa-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .mapa-card-pac { font-size: 13px; font-weight: 600; color: var(--text); }
+  .mapa-card-info { font-size: 11px; color: var(--text2); margin-top: 3px; line-height: 1.6; }
+  .mapa-card-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">EndoCenter</div>
+    <div class="login-sub">Gestão Cirúrgica — faça login para continuar</div>
+    <div class="lf"><label>E-mail</label><input type="email" id="l-email" placeholder="seu@email.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="lf"><label>Senha</label><input type="password" id="l-senha" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+      <input type="checkbox" id="l-lembrar" style="accent-color:var(--accent);width:14px;height:14px;cursor:pointer">
+      <label for="l-lembrar" style="font-size:12px;color:var(--text2);cursor:pointer">Lembrar-me neste dispositivo</label>
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;font-size:13px;margin-top:4px" onclick="doLogin()">Entrar</button>
+    <div class="err-msg" id="login-err"></div>
+    <div style="margin-top:16px;text-align:center;border-top:1px solid var(--border);padding-top:14px">
+      <span style="font-size:11px;color:var(--text3)">Primeiro acesso neste computador? </span>
+      <span style="font-size:11px;color:var(--accent);cursor:pointer;text-decoration:underline" onclick="abrirConfig()">Configurar banco de dados</span>
+    </div>
+  </div>
+</div>
+
+<!-- CFG -->
+<div class="cfg-screen" id="cfg-screen">
+  <div class="cfg-box">
+    <div style="font-family:var(--mono);font-size:18px;color:var(--accent);margin-bottom:6px">EndoCenter — Configuração</div>
+    <div style="color:var(--text3);font-size:12px;line-height:1.7;margin-bottom:20px">Conecte ao banco de dados compartilhado. Faça isso uma vez por computador.</div>
+    <div class="cfg-steps">
+      <b>1 —</b> Acesse <a href="https://jsonbin.io" target="_blank">jsonbin.io</a> e faça login<br>
+      <b>2 —</b> Clique em <b>API Keys</b> e copie sua <b>Master Key</b><br>
+      <b>3 —</b> Clique em <b>Bins</b> e copie o <b>Bin ID</b><br>
+      <b>4 —</b> Cole abaixo e clique em Conectar
+    </div>
+    <div class="cfg-f"><label>Master Key</label><input type="text" id="cfg-key" placeholder="$2a$10$..." autocomplete="off"></div>
+    <div class="cfg-f"><label>Bin ID</label><input type="text" id="cfg-bin" placeholder="69bfeaf1..."></div>
+    <button type="button" class="btn btn-secondary" style="width:100%;justify-content:center;padding:8px;margin-top:4px;margin-bottom:6px;font-size:11px" onclick="document.getElementById('cfg-key').value='$2a$10$PurCT.rZOEaM.X4ns8bI4udR3Xm5kQZf0TgsvYwe3ztqin7yLZfp2';document.getElementById('cfg-bin').value='69bfeaf1b7ec241ddc90343a'">📋 Preencher automaticamente</button>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;margin-top:4px" onclick="doConnect()">🔗 Conectar</button>
+    <div class="err-msg" id="cfg-err"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+<div class="header">
+  <div class="logo">Endo<em>Center</em></div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <div class="sync"><div class="sync-dot" id="sdot"></div><span id="slbl">—</span></div>
+    <div class="user-chip" onclick="doLogout()">
+      <div class="uavatar" id="uav"></div>
+      <span id="uname"></span>
+      <span style="color:var(--text3);font-size:10px">· Sair</span>
+    </div>
+  </div>
+</div>
+
+<div class="app-wrap">
+  <div class="sidebar">
+    <div class="nav-sec">Menu</div>
+    <div class="nav-item active" onclick="showPage('dash',this)"><span>◈</span> Dashboard</div>
+    <div class="nav-item" onclick="showPage('cotacoes',this)"><span>≡</span> Cotações</div>
+    <div class="nav-item" onclick="showPage('mapa',this)"><span>🗓</span> Mapa Cirúrgico</div>
+    <div class="nav-item" onclick="showPage('faturamento',this)" id="nav-fat"><span>$</span> Faturamento</div>
+    <div class="nav-item" onclick="showPage('expedicao',this)"><span>🚚</span> Expedição</div>
+    <div class="nav-item" onclick="showPage('relatorios',this)"><span>📊</span> Relatórios</div>
+    <div class="nav-item" onclick="showPage('cadastros',this)" id="nav-cad" style="display:none"><span>🗄</span> Cadastros</div>
+    <div class="nav-item" onclick="showPage('usuarios',this)" id="nav-users" style="display:none"><span>👥</span> Usuários</div>
+    <div class="nav-sec" style="margin-top:8px">Atalhos</div>
+    <div class="nav-item" onclick="quickNav('hoje')"><span>📅</span> Hoje</div>
+    <div class="nav-item" onclick="quickNav('urgencia')"><span>🔴</span> Urgências</div>
+    <div class="nav-item" onclick="quickNav('overdue')"><span>⚠</span> Atraso <span class="nav-badge" id="badge-ov" style="display:none">0</span></div>
+    <div class="nav-item" onclick="quickNav('recolher')"><span>📦</span> A recolher</div>
+    <div class="nav-sec" style="margin-top:8px">Sistema</div>
+    <div class="nav-item" onclick="loadData()"><span>↻</span> Atualizar</div>
+    <div class="nav-item" style="color:var(--danger)" onclick="abrirConfig()"><span>⚙</span> Reconfigurar</div>
+  </div>
+
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dash">
+      <div class="ph"><div><div class="ph-title">Dashboard</div><div class="ph-sub" id="dash-date"></div></div>
+        <button class="btn btn-primary btn-sm" id="btn-novo-dash" onclick="openCotForm()" style="display:none">＋ Nova Cotação</button>
+      </div>
+      <div class="cards" id="dash-cards"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" id="dash-tables"></div>
+    </div>
+
+    <!-- COTAÇÕES -->
+    <div class="page" id="page-cotacoes">
+      <div class="ph">
+        <div><div class="ph-title">Cotações</div><div class="ph-sub">Pipeline independente</div></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="param-badge" onclick="openParamModal()" title="Parâmetro de dias para resposta">⏱ <span id="param-dias-badge">5</span>d prazo</span>
+          <button class="btn btn-ghost btn-sm" onclick="exportCot('xlsx')">⬇ Excel</button>
+          <button class="btn btn-ghost btn-sm" onclick="exportCot('pdf')">📄 PDF</button>
+          <button class="btn btn-primary btn-sm" id="btn-novo-cot" onclick="openCotForm()" style="display:none">＋ Nova Cotação</button>
+        </div>
+      </div>
+      <div class="filters">
+        <input class="fi" placeholder="🔍 Buscar..." id="cf-s" oninput="renderCot()" style="width:180px">
+        <select class="fs" id="cf-stage" onchange="renderCot()">
+          <option value="">Todas etapas</option>
+          <option value="cotacao">Cotação enviada</option>
+          <option value="aprovacao">Em análise</option>
+          <option value="autorizado">Autorizado</option>
+          <option value="negado">Negado</option>
+          <option value="faturado">Faturado</option>
+          <option value="pago">Pago</option>
+        </select>
+        <select class="fs" id="cf-hosp" onchange="renderCot()"><option value="">Todos hospitais</option></select>
+        <select class="fs" id="cf-resp" onchange="renderCot()"><option value="">Todos responsáveis</option></select>
+        <button class="btn btn-ghost btn-sm" onclick="clearF('cot')">✕</button>
+      </div>
+      <div class="tw">
+        <table><thead><tr>
+          <th>ID</th><th>Paciente</th><th>Hospital</th><th>Procedimento</th><th>Convênio</th>
+          <th>Portal</th><th>Etapa</th><th>⏱</th><th>Cotado</th><th>Aprovado</th><th>Dt. Aut.</th><th>Resp.</th><th></th>
+        </tr></thead>
+        <tbody id="cot-body"></tbody>
+        <tr style="background:var(--s2)"><td colspan="8" style="font-size:10px;color:var(--text3);padding:8px 12px">TOTAIS</td>
+          <td id="sum-cot" class="money m-warn"></td>
+          <td id="sum-ap" class="money m-green"></td>
+          <td colspan="3"></td>
+        </tr>
+        </table>
+        <div class="tf"><span id="cot-count"></span><span id="cot-total"></span></div>
+      </div>
+    </div>
+
+    <!-- MAPA -->
+    <div class="page" id="page-mapa">
+      <div class="ph">
+        <div><div class="ph-title">Mapa Cirúrgico</div><div class="ph-sub">Agenda de procedimentos</div></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" onclick="setMapaView('grid')">Grade</button>
+          <button class="btn btn-ghost btn-sm" onclick="setMapaView('list')">Lista</button>
+          <button class="btn btn-ghost btn-sm" onclick="exportMapa()">⬇ Excel</button>
+          <button class="btn btn-green btn-sm" onclick="openMapaCompartilhar()">🔗 Compartilhar</button>
+          <button class="btn btn-primary btn-sm" id="btn-novo-mapa" onclick="openMapaForm()" style="display:none">＋ Nova Cirurgia</button>
+        </div>
+      </div>
+      <div class="filters">
+        <input class="fi" placeholder="🔍 Buscar..." id="mf-s" oninput="renderMapa()" style="width:180px">
+        <select class="fs" id="mf-status" onchange="renderMapa()"><option value="">Todos status</option><option>Eletivo</option><option>Urgência</option><option>Adiada</option><option>Cancelada</option><option>Realizado</option><option>Ag. Faturamento</option><option>Faturada</option></select>
+        <select class="fs" id="mf-hosp" onchange="renderMapa()"><option value="">Todos hospitais</option></select>
+        <button class="btn btn-ghost btn-sm" onclick="clearF('mapa')">✕</button>
+      </div>
+      <div id="mapa-cont"></div>
+      <div id="mapa-cards" style="display:none"></div>
+    </div>
+
+    <!-- FATURAMENTO -->
+    <div class="page" id="page-faturamento">
+      <div class="ph">
+        <div><div class="ph-title">Faturamento</div><div class="ph-sub">Controle financeiro e materiais</div></div>
+        <button class="btn btn-ghost btn-sm" onclick="exportFat()">⬇ Excel</button>
+      </div>
+      <div class="cards" id="fat-cards"></div>
+      <div class="tw">
+        <table><thead><tr>
+          <th>Cot. ID</th><th>Paciente</th><th>Hospital</th><th>Procedimento</th><th>Conv.</th>
+          <th>Dt. Aut.</th><th>Etapa Cot.</th><th>Vl. Autorizado</th><th>Fat. lib.</th><th>Dt. Fat.</th><th>Dt. Pgto.</th><th>A recolher</th><th></th>
+        </tr></thead>
+        <tbody id="fat-body"></tbody>
+        </table>
+        <div class="tf"><span id="fat-count"></span><span id="fat-total"></span></div>
+      </div>
+    </div>
+
+    <!-- RELATÓRIOS -->
+    <div class="page" id="page-relatorios">
+      <div class="ph">
+        <div><div class="ph-title">Relatórios</div><div class="ph-sub">Análises e indicadores</div></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select class="fs" id="rel-periodo" onchange="renderRelatorios()" style="font-size:11px">
+            <option value="todos">Todo o período</option>
+            <option value="mes">Este mês</option>
+            <option value="trimestre">Este trimestre</option>
+            <option value="ano">Este ano</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" onclick="exportRelatorios()">⬇ Excel</button>
+        </div>
+      </div>
+
+      <!-- CARDS RESUMO -->
+      <div class="cards" id="rel-cards" style="margin-bottom:24px"></div>
+
+      <!-- GRID DE RELATÓRIOS -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <!-- Hospitais mais cotados -->
+        <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:16px">
+          <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:12px">🏥 Hospitais com mais cotações</div>
+          <div id="rel-hospitais"></div>
+        </div>
+        <!-- Convênios mais cotados -->
+        <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:16px">
+          <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:12px">💳 Planos/Convênios mais cotados</div>
+          <div id="rel-convenios"></div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <!-- Taxa aprovação por plano -->
+        <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:16px">
+          <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:12px">✅ Taxa de aprovação por plano</div>
+          <div id="rel-aprovacao"></div>
+        </div>
+        <!-- Produtos mais cotados -->
+        <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:16px">
+          <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:12px">📦 Produtos mais cotados</div>
+          <div id="rel-produtos"></div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <!-- Faturamento por mês -->
+        <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:16px">
+          <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:12px">📈 Faturamento mensal</div>
+          <div id="rel-faturamento"></div>
+        </div>
+        <!-- Performance por vendedor -->
+        <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:16px">
+          <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:12px">👤 Performance por vendedor</div>
+          <div id="rel-vendedores"></div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <!-- Valores cotados vs aprovados -->
+        <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:16px">
+          <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:12px">💰 Cotado vs Aprovado</div>
+          <div id="rel-valores"></div>
+        </div>
+        <!-- Sem resposta -->
+        <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:16px">
+          <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:12px">⚠ Cotações sem resposta</div>
+          <div id="rel-semresp"></div>
+        </div>
+      </div>
+
+      <!-- Tempo médio por plano -->
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px">
+        <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:12px">⏱ Tempo médio de resposta por plano (dias)</div>
+        <div id="rel-tempo"></div>
+      </div>
+    </div>
+
+    <!-- EXPEDIÇÃO -->
+    <div class="page" id="page-expedicao">
+      <div class="ph">
+        <div><div class="ph-title">Expedição</div><div class="ph-sub">Controle de entrega de materiais</div></div>
+        <button class="btn btn-ghost btn-sm" onclick="exportExp()">⬇ Excel</button>
+      </div>
+      <div class="cards" id="exp-cards"></div>
+      <div class="filters">
+        <input class="fi" placeholder="🔍 Buscar..." id="ef-s" oninput="renderExp()" style="width:200px">
+        <select class="fs" id="ef-status" onchange="renderExp()">
+          <option value="">Todos status</option>
+          <option>Pendente</option><option>Separado</option><option>Enviado</option>
+          <option>Entregue</option><option>Devolvido</option>
+        </select>
+        <select class="fs" id="ef-tipo" onchange="renderExp()">
+          <option value="">Todos tipos</option>
+          <option>Logística própria</option><option>Motoboy</option>
+          <option>Transportadora</option><option>Assessora leva</option><option>Entrega externa</option>
+        </select>
+        <select class="fs" id="ef-hosp" onchange="renderExp()"><option value="">Todos hospitais</option></select>
+        <button class="btn btn-ghost btn-sm" onclick="clearF('exp')">✕</button>
+      </div>
+      <div class="tw">
+        <table><thead><tr>
+          <th>Cir. ID</th><th>Cot.</th><th>Data Cir.</th><th>Paciente</th><th>Hospital</th>
+          <th>Status Entrega</th><th>Tipo Entrega</th><th>Entregou</th><th>Dt. Envio</th>
+          <th>Recebeu</th><th>Setor</th><th>Dt. Entrega</th><th></th>
+        </tr></thead>
+        <tbody id="exp-body"></tbody></table>
+        <div class="tf"><span id="exp-count"></span></div>
+      </div>
+    </div>
+
+    <!-- CADASTROS -->
+    <div class="page" id="page-cadastros">
+      <div class="ph"><div><div class="ph-title">Cadastros</div><div class="ph-sub">Hospitais e materiais</div></div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+        <div class="cad-tabs" style="margin-bottom:0">
+          <div class="cad-tab active" onclick="setCadTab('hospitais',this)">🏥 Hospitais</div>
+          <div class="cad-tab" onclick="setCadTab('materiais',this)">📦 Materiais</div>
+          <div class="cad-tab" onclick="setCadTab('assessores',this)">👩 Assessores</div>
+        </div>
+        <input class="fi" placeholder="🔍 Buscar..." id="cad-search" oninput="renderCadastros()" style="width:200px">
+      </div>
+      <!-- HOSPITAIS -->
+      <div id="cad-hospitais">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+          <button class="btn btn-primary btn-sm" onclick="openHospForm()">＋ Novo Hospital</button>
+        </div>
+        <div class="tw">
+          <table><thead><tr><th>Nome</th><th>Cidade</th><th>Contato</th><th>Observação</th><th style="width:140px"></th></tr></thead>
+          <tbody id="hosp-body"></tbody></table>
+        <div class="tf"><span id="hosp-count"></span></div>
+        </div>
+      </div>
+      <!-- ASSESSORES -->
+      <div id="cad-assessores" style="display:none">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+          <button class="btn btn-primary btn-sm" onclick="openAssForm()">＋ Nova Assessora</button>
+        </div>
+        <div class="tw">
+          <table><thead><tr><th>Nome</th><th>Telefone</th><th>Observação</th><th></th></tr></thead>
+          <tbody id="ass-body"></tbody></table>
+        </div>
+      </div>
+      <!-- MATERIAIS CADASTRO -->
+      <div id="cad-materiais" style="display:none">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+          <button class="btn btn-primary btn-sm" onclick="openMatForm()">＋ Novo Material</button>
+        </div>
+        <div class="tw">
+          <table><thead><tr><th>Referência</th><th>Descrição</th><th>Fabricante</th><th>ANVISA</th><th>Vl. Unit.</th><th>Observação</th><th></th></tr></thead>
+          <tbody id="mat-body"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- USUÁRIOS -->
+    <div class="page" id="page-usuarios">
+      <div class="ph"><div><div class="ph-title">Usuários</div></div>
+        <button class="btn btn-primary btn-sm" onclick="openUserForm()">＋ Novo Usuário</button>
+      </div>
+      <div class="users-grid" id="users-grid"></div>
+    </div>
+
+  </div>
+</div>
+</div><!-- /app -->
+
+<!-- FORM COTAÇÃO -->
+<div class="overlay" id="cot-overlay">
+  <div class="panel" style="width:860px">
+    <div class="panel-hdr"><h2 id="cot-form-title">Nova Cotação</h2><button class="xbtn" onclick="closeCotForm()">×</button></div>
+    <div class="panel-body" id="cot-form-body"></div>
+    <div class="panel-foot">
+      <button class="btn btn-ghost" onclick="closeCotForm()">Cancelar</button>
+      <button class="btn btn-secondary btn-sm" id="btn-save-cot" onclick="saveCot(false)">💾 Salvar rascunho</button>
+      <button class="btn btn-primary" id="btn-advance-cot" onclick="saveCot(true)">Salvar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- FORM MAPA -->
+<div class="overlay" id="mapa-overlay">
+  <div class="panel" style="width:860px">
+    <div class="panel-hdr"><h2 id="mapa-form-title">Nova Cirurgia</h2><button class="xbtn" onclick="closeMapaForm()">×</button></div>
+    <div class="panel-body" id="mapa-form-body"></div>
+    <div class="panel-foot">
+      <button class="btn btn-ghost" onclick="closeMapaForm()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveMapa()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL -->
+<div class="detail-overlay" id="detail-overlay" onclick="closeDetail(event)">
+  <div class="detail-panel" id="detail-panel"></div>
+</div>
+
+<!-- MAPA COMPARTILHAR -->
+<div class="overlay" id="comp-overlay">
+  <div class="panel" style="width:900px">
+    <div class="panel-hdr">
+      <h2>📋 Mapa Cirúrgico — Versão para compartilhar</h2>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-primary btn-sm" onclick="window.print()">🖨 Imprimir / Print</button>
+        <button class="xbtn" onclick="closeMapaCompartilhar()">×</button>
+      </div>
+    </div>
+    <div class="panel-body" id="comp-body"></div>
+  </div>
+</div>
+
+<!-- EXPEDIÇÃO FORM -->
+<div class="overlay" id="exp-overlay">
+  <div class="panel" style="width:640px">
+    <div class="panel-hdr"><h2 id="exp-form-title">Registrar Entrega</h2><button class="xbtn" onclick="closeExpForm()">×</button></div>
+    <div class="panel-body">
+      <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:16px" id="exp-cir-info"></div>
+      <div class="frow">
+        <div class="fg"><label>Status entrega *</label>
+          <select id="expf-status"><option>Pendente</option><option>Separado</option><option>Enviado</option><option>Entregue</option><option>Devolvido</option></select>
+        </div>
+        <div class="fg"><label>Tipo de entrega</label>
+          <select id="expf-tipo">
+            <option value="">Selecione</option>
+            <option>Logística própria</option><option>Motoboy</option>
+            <option>Transportadora</option><option>Assessora leva</option><option>Entrega externa</option>
+          </select>
+        </div>
+        <div class="fg"><label>Quem entregou</label><input type="text" id="expf-resp" placeholder="Nome do entregador"></div>
+        <div class="fg"><label>Data/hora do envio</label><input type="datetime-local" id="expf-dataenvio"></div>
+      </div>
+      <div class="frow" style="margin-top:10px">
+        <div class="fg"><label>Recebido por</label><input type="text" id="expf-recebido" placeholder="Nome do recebedor"></div>
+        <div class="fg"><label>Setor do hospital</label><input type="text" id="expf-setor" placeholder="Ex: CC, CME, Recepção"></div>
+        <div class="fg"><label>Data/hora de entrega</label><input type="datetime-local" id="expf-dataentrega"></div>
+      </div>
+      <div class="frow" style="margin-top:10px">
+        <div class="fg full"><label>Observações</label><textarea id="expf-obs" style="min-height:50px"></textarea></div>
+      </div>
+    </div>
+    <div class="panel-foot">
+      <button class="btn btn-ghost" onclick="closeExpForm()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveExp()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ASSESSORA FORM -->
+<div class="overlay" id="ass-overlay">
+  <div class="panel" style="width:460px">
+    <div class="panel-hdr"><h2 id="ass-form-title">Nova Assessora</h2><button class="xbtn" onclick="closeAssForm()">×</button></div>
+    <div class="panel-body">
+      <div class="frow">
+        <div class="fg full"><label>Nome *</label><input type="text" id="af-nome" placeholder="Nome completo"></div>
+        <div class="fg"><label>Telefone</label><input type="text" id="af-tel" placeholder="(81) 99999-9999"></div>
+        <div class="fg full"><label>Observação</label><input type="text" id="af-obs"></div>
+      </div>
+      <div class="err-msg" id="af-err"></div>
+    </div>
+    <div class="panel-foot">
+      <button class="btn btn-ghost" onclick="closeAssForm()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveAss()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- HOSPITAL FORM -->
+<div class="overlay" id="hosp-overlay">
+  <div class="panel" style="width:500px">
+    <div class="panel-hdr"><h2 id="hosp-form-title">Novo Hospital</h2><button class="xbtn" onclick="closeHospForm()">×</button></div>
+    <div class="panel-body">
+      <div class="frow">
+        <div class="fg full"><label>Nome *</label><input type="text" id="hf-nome" placeholder="Nome do hospital"></div>
+        <div class="fg"><label>Cidade</label><input type="text" id="hf-cidade"></div>
+        <div class="fg"><label>Contato</label><input type="text" id="hf-contato" placeholder="Tel. ou e-mail"></div>
+        <div class="fg full"><label>Observação</label><input type="text" id="hf-obs"></div>
+      </div>
+      <div class="err-msg" id="hf-err"></div>
+    </div>
+    <div class="panel-foot">
+      <button class="btn btn-ghost" onclick="closeHospForm()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveHosp()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MATERIAL FORM -->
+<div class="overlay" id="mat-overlay">
+  <div class="panel" style="width:600px">
+    <div class="panel-hdr"><h2 id="mat-form-title">Novo Material</h2><button class="xbtn" onclick="closeMatForm()">×</button></div>
+    <div class="panel-body">
+      <div class="frow">
+        <div class="fg"><label>Referência *</label><input type="text" id="maf-ref" placeholder="Cód. produto"></div>
+        <div class="fg full"><label>Descrição *</label><input type="text" id="maf-desc"></div>
+        <div class="fg"><label>Fabricante</label><input type="text" id="maf-fab"></div>
+        <div class="fg"><label>Reg. ANVISA</label><input type="text" id="maf-anvisa" placeholder="Ex: 10101234567"></div>
+        <div class="fg"><label>Valor unitário (R$)</label><input type="number" id="maf-vunit" step="0.01" min="0"></div>
+        <div class="fg full"><label>Observação</label><input type="text" id="maf-obs"></div>
+      </div>
+      <div class="err-msg" id="maf-err"></div>
+    </div>
+    <div class="panel-foot">
+      <button class="btn btn-ghost" onclick="closeMatForm()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveMat()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- PARAM MODAL -->
+<div class="overlay" id="param-overlay">
+  <div class="panel" style="width:400px">
+    <div class="panel-hdr"><h2>Parâmetros de Prazo</h2><button class="xbtn" onclick="closeParamModal()">×</button></div>
+    <div class="panel-body">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:16px">Configure os prazos de alerta para resposta de cotações. O contador aparece em tempo real na tela.</div>
+      <div class="frow">
+        <div class="fg"><label>Prazo padrão (dias)</label><input type="number" id="param-dias" min="1" max="60" value="5"></div>
+        <div class="fg"><label>Alerta amarelo a partir de (dias)</label><input type="number" id="param-warn" min="1" max="60" value="3"></div>
+        <div class="fg"><label>Alerta vermelho a partir de (dias)</label><input type="number" id="param-bad" min="1" max="60" value="5"></div>
+      </div>
+      <div style="margin-top:12px;font-size:11px;color:var(--text3)">
+        🟢 Verde = dentro do prazo &nbsp; 🟡 Amarelo = atenção &nbsp; 🔴 Vermelho = vencido
+      </div>
+    </div>
+    <div class="panel-foot">
+      <button class="btn btn-ghost" onclick="closeParamModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveParams()">Salvar parâmetros</button>
+    </div>
+  </div>
+</div>
+
+<!-- USER FORM -->
+<div class="overlay" id="user-overlay">
+  <div class="panel" style="width:460px">
+    <div class="panel-hdr"><h2 id="uf-title">Novo Usuário</h2><button class="xbtn" onclick="closeUserForm()">×</button></div>
+    <div class="panel-body">
+      <div class="frow">
+        <div class="fg full"><label>Nome *</label><input type="text" id="uf-nome"></div>
+        <div class="fg full"><label>E-mail *</label><input type="email" id="uf-email"></div>
+        <div class="fg full"><label>Senha *</label><input type="password" id="uf-senha"></div>
+        <div class="fg full"><label>Perfil *</label>
+          <select id="uf-perfil">
+            <option value="">Selecione</option>
+            <option value="cotacao">Cotação</option>
+            <option value="mapa">Mapa + Faturamento</option>
+            <option value="logistica">Logística</option>
+            <option value="estoque">Estoque</option>
+            <option value="vendedor">Vendedor</option>
+            <option value="gerente">Gerente</option>
+            <option value="diretor">Diretor</option>
+            <option value="gestor">Gestor</option>
+          </select>
+        </div>
+      </div>
+      <div class="err-msg" id="uf-err"></div>
+    </div>
+    <div class="panel-foot">
+      <button class="btn btn-ghost" onclick="closeUserForm()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveUser()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+const CFG_KEY='ec_cfg';
+let cfg=null, currentUser=null;
+let cotacoes=[], mapaItems=[], users=[], hospitais=[], materiais=[], assessores=[], logs=[];
+let params={dias:5, warn:3, bad:5};
+let editCotId=null, editMapaId=null, editUserId=null, editHospId=null, editMatId=null;
+let mapaView='grid';
+
+function getConfig(){ try{ return JSON.parse(localStorage.getItem(CFG_KEY)||'null'); }catch(e){ return null; } }
+function doConnect(){
+  const key=document.getElementById('cfg-key').value.trim();
+  const bin=document.getElementById('cfg-bin').value.trim();
+  const err=document.getElementById('cfg-err');
+  err.style.display='none';
+  if(!key||!bin){ err.textContent='Preencha os dois campos.'; err.style.display='block'; return; }
+  localStorage.setItem(CFG_KEY,JSON.stringify({key,bin}));
+  cfg=getConfig();
+  document.getElementById('cfg-screen').classList.remove('open');
+  document.getElementById('login-screen').style.display='flex';
+  // Load data immediately after connecting
+  loadData();
+}
+function resetCfg(){
+  localStorage.removeItem(CFG_KEY);
+  // Pre-fill the known values to make it easier
+  document.getElementById('cfg-screen').classList.add('open');
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('cfg-key').value='';
+  document.getElementById('cfg-bin').value='';
+}
+
+const CATALOG_URL='https://raw.githubusercontent.com/Johhnnetto/endocenter-catalogo/refs/heads/main/catalog_dados.json';
+let catalogCache=null;
+async function apiReadCatalog(){
+  if(catalogCache&&catalogCache.hospitais.length>0) return catalogCache;
+  try{
+    const cached=localStorage.getItem('ec_cat'); const ts=localStorage.getItem('ec_cat_ts');
+    // Use cache if less than 5 minutes old AND catalog has commercial refs
+    if(cached&&ts&&(Date.now()-parseInt(ts))<300000){ 
+      const parsed=JSON.parse(cached);
+      const sampleMat=parsed.materiais&&parsed.materiais[0];
+      const hasCommercialRef=sampleMat&&sampleMat.ref&&isNaN(sampleMat.ref);
+      if(parsed.hospitais&&parsed.hospitais.length>0&&hasCommercialRef){ catalogCache=parsed; return catalogCache; }
+    }
+    localStorage.removeItem('ec_cat'); localStorage.removeItem('ec_cat_ts');
+  }catch(e){}
+  try{
+    const r=await fetch(CATALOG_URL+'?t='+Date.now());
+    if(!r.ok) return {hospitais:[],materiais:[]};
+    const d=await r.json();
+    catalogCache={hospitais:Array.isArray(d.hospitais)?d.hospitais:[],materiais:Array.isArray(d.materiais)?d.materiais:[]};
+    try{localStorage.setItem('ec_cat',JSON.stringify(catalogCache));localStorage.setItem('ec_cat_ts',Date.now().toString());}catch(e){}
+    return catalogCache;
+  }catch(e){return {hospitais:[],materiais:[]};}
+}
+async function apiRead(){
+  const r=await fetch(`https://api.jsonbin.io/v3/b/${cfg.bin}/latest`,{headers:{'X-Master-Key':cfg.key}});
+  if(!r.ok) throw new Error('Erro '+r.status);
+  const j=await r.json(); const d=j.record||{};
+  // Support both old structure (records/users) and new (cotacoes/users)
+  const usersData = Array.isArray(d.users)?d.users:(Array.isArray(d.records)?[]:[]); 
+  return {
+    cotacoes:Array.isArray(d.cotacoes)?d.cotacoes:[],
+    mapaItems:Array.isArray(d.mapaItems)?d.mapaItems:[],
+    users:usersData,
+    assessores:Array.isArray(d.assessores)?d.assessores:[],
+    hospitais_extra:Array.isArray(d.hospitais_extra)?d.hospitais_extra:[],
+    materiais_extra:Array.isArray(d.materiais_extra)?d.materiais_extra:[],
+    logs:Array.isArray(d.logs)?d.logs:[],
+    params:d.params||{dias:5,warn:3,bad:5}
+  };
+}
+async function apiWrite(){
+  const r=await fetch(`https://api.jsonbin.io/v3/b/${cfg.bin}`,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':cfg.key},body:JSON.stringify({cotacoes,mapaItems,users,assessores,logs,params,hospitais_extra:hospitais.filter(h=>h.id.startsWith('hlocal')),materiais_extra:materiais.filter(m=>m.id.startsWith('mlocal'))})});
+  if(!r.ok) throw new Error('Erro '+r.status);
+}
+
+function setSync(s,m){ document.getElementById('sdot').className='sync-dot '+s; document.getElementById('slbl').textContent=m; }
+
+async function loadData(silent=false){
+  if(!silent) setSync('saving','Carregando...');
+  try{
+    const d=await apiRead();
+    cotacoes=d.cotacoes; mapaItems=d.mapaItems; users=d.users;
+    logs=d.logs; assessores=d.assessores||[];
+    if(d.params) params=d.params;
+    const badge=document.getElementById('param-dias-badge');
+    if(badge) badge.textContent=params.dias;
+    if(users.length===0){
+      users=[{id:'u1',nome:'Gestor',email:'gestor@endocenter.com',senha:'Joaoneto@123',perfil:'gestor'}];
+      await apiWrite();
+    }
+    setSync('ok','Sincronizado · '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
+    refreshAll(); updateBadges();
+    // Auto-login se sessão salva
+    try{
+      const sess=JSON.parse(localStorage.getItem('ec_session')||'null');
+      // Sessão válida por 30 dias
+      if(sess && sess.email && sess.senha && (Date.now()-sess.ts)<30*24*3600*1000){
+        const u=users.find(x=>x.email.toLowerCase()===sess.email.toLowerCase()&&x.senha===sess.senha);
+        if(u){
+          currentUser=u;
+          document.getElementById('login-screen').style.display='none';
+          document.getElementById('app').style.display='block';
+          setupRole(); refreshAll(); updateBadges();
+        }
+      }
+    }catch(e){}
+    // Load catalog in background - don't block login
+    const extraH=d.hospitais_extra||[];
+    const extraM=d.materiais_extra||[];
+    apiReadCatalog().then(cat=>{
+      hospitais=[...cat.hospitais,...extraH];
+      materiais=[...cat.materiais,...extraM];
+      const ap=document.querySelector('.page.active')?.id;
+      if(ap==='page-cadastros') renderCadastros();
+      if(ap==='page-relatorios') renderRelatorios();
+    }).catch(e=>console.log('Catalog load:', e));
+  }catch(e){ setSync('err','Erro'); showToast('⚠ '+e.message); }
+}
+async function saveData(){
+  setSync('saving','Salvando...');
+  try{ await apiWrite(); setSync('ok','Salvo · '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})); }
+  catch(e){ setSync('err','Erro'); showToast('⚠ '+e.message); }
+}
+
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+function abrirConfig(){
+  // Clear config and show config screen with hint
+  localStorage.removeItem(CFG_KEY);
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('cfg-screen').classList.add('open');
+}
+function doLogin(){
+  const email=document.getElementById('l-email').value.trim().toLowerCase();
+  const senha=document.getElementById('l-senha').value;
+  const err=document.getElementById('login-err');
+  err.style.display='none';
+  // Fallback: always allow gestor login even if bin is empty/loading
+  // Reload fresh data if users list seems outdated (less than 3 users)
+  if(users.length < 3){
+    err.textContent='Carregando... tente novamente em 2 segundos.'; err.style.display='block';
+    apiRead().then(d=>{ if(d?.users) users=d.users; err.style.display='none'; }); return;
+  }
+  let u=users.find(x=>x.email.toLowerCase()===email&&x.senha===senha);
+  if(!u && email==='gestor@endocenter.com' && senha==='Joaoneto@123'){
+    u={id:'u1',nome:'Gestor',email:'gestor@endocenter.com',senha:'Joaoneto@123',perfil:'gestor'};
+    if(!users.find(x=>x.id==='u1')) users.push(u);
+  }
+  if(!u){ err.textContent='E-mail ou senha incorretos.'; err.style.display='block'; return; }
+  currentUser=u;
+  // Salvar sessão se "lembrar-me" marcado
+  const lembrar=document.getElementById('l-lembrar')?.checked;
+  if(lembrar){
+    try{ localStorage.setItem('ec_session', JSON.stringify({email:u.email, senha:u.senha, ts:Date.now()})); }catch(e){}
+  } else {
+    try{ localStorage.removeItem('ec_session'); }catch(e){}
+  }
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  setupRole(); refreshAll(); updateBadges();
+}
+function doLogout(){ if(!confirm('Sair?')) return; currentUser=null; try{localStorage.removeItem('ec_session');}catch(e){} document.getElementById('app').style.display='none'; document.getElementById('login-screen').style.display='flex'; document.getElementById('l-senha').value=''; }
+
+function setupRole(){
+  const r=currentUser.perfil;
+  const init=currentUser.nome.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('uav').textContent=init;
+  document.getElementById('uname').textContent=currentUser.nome;
+  document.getElementById('nav-users').style.display=r==='gestor'?'flex':'none';
+  document.getElementById('nav-cad').style.display=r==='gestor'?'flex':'none';
+  const canCot=['cotacao','mapa','gestor'].includes(r);
+  const canMapa=['cotacao','mapa','logistica','estoque','gestor'].includes(r);
+  ['btn-novo-dash','btn-novo-cot'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display=canCot?'':'none'; });
+  const bmapa=document.getElementById('btn-novo-mapa'); if(bmapa) bmapa.style.display=canMapa?'':'none';
+}
+
+function canDo(action){
+  const r=currentUser?.perfil;
+  if(r==='gestor') return true;
+  if(action==='cot') return ['cotacao','mapa'].includes(r);
+  if(action==='mapa') return ['cotacao','mapa','logistica','estoque'].includes(r);
+  if(action==='fat') return ['mapa','mapa_fat'].includes(r);
+  if(action==='exp') return ['logistica','estoque'].includes(r);
+  if(action==='pgto') return ['diretor'].includes(r);
+  if(action==='cad') return false; // only gestor
+  return false;
+}
+function isRO(){ return ['vendedor','gerente','diretor'].includes(currentUser?.perfil); }
+function canEdit(){ return !isRO(); }
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+function fd(d){ if(!d) return '—'; const[y,m,day]=d.split('-'); return `${day}/${m}/${y}`; }
+function fm(v){ if(!v&&v!==0) return '—'; return 'R$ '+parseFloat(v).toLocaleString('pt-BR',{minimumFractionDigits:2}); }
+function daysBetween(a,b){ if(!a) return null; return Math.max(0,Math.round(((b?new Date(b):new Date())-new Date(a))/86400000)); }
+function genCotId(){ const max=cotacoes.reduce((a,r)=>{ const n=parseInt(r.id?.replace('COT-','')||0); return n>a?n:a; },0); return 'COT-'+String(max+1).padStart(4,'0'); }
+function genMapaId(){ const max=mapaItems.reduce((a,r)=>{ const n=parseInt(r.id?.replace('CIR-','')||0); return n>a?n:a; },0); return 'CIR-'+String(max+1).padStart(4,'0'); }
+function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800); }
+
+const STAGE_LABEL={cotacao:'Cotação enviada',aprovacao:'Em análise',autorizado:'Autorizado',negado:'Negado',faturado:'Faturado',pago:'Pago'};
+const STAGE_CLASS={cotacao:'st-cotacao',aprovacao:'st-aprovacao',autorizado:'st-autorizado',negado:'st-negado',faturado:'st-faturado',pago:'st-pago'};
+const CIR_CLASS={Eletivo:'mc-eletivo',Urgência:'mc-urgencia',Cancelado:'mc-cancelado',Realizado:'mc-realizado',Adiada:'mc-adiada','Ag. Faturamento':'mc-agfat',Faturada:'mc-faturada'};
+
+function getMapaClass(m){
+  const today=new Date().toISOString().split('T')[0];
+  const tom=new Date(); tom.setDate(tom.getDate()+1); const amanha=tom.toISOString().split('T')[0];
+  if(m.status==='Cancelada') return 'cancelada';
+  if(m.status==='Adiada') return 'adiada';
+  if(m.status==='Realizada') return 'realizada';
+  if(m.status==='Ag. Faturamento') return 'ag-fat';
+  if(m.status==='Faturada') return 'faturada';
+  if(m.datacir===today) return 'hoje';
+  if(m.datacir===amanha||m.datacir>today) return 'amanha';
+  return '';
+}
+function getStatusBadge(m){
+  const cls=getMapaClass(m);
+  const labels={hoje:'Hoje',amanha:'Agendada',cancelada:'Cancelada',adiada:'Adiada',realizada:'Realizada','ag-fat':'Ag. Faturamento',faturada:'Faturada','':`${m.status}`};
+  return `<span class="status-${cls||'amanha'}">${labels[cls]||m.status}</span>`;
+}
+const CANAL_CLASS={WhatsApp:'cc-whats','E-mail':'cc-email',Telefone:'cc-tel',Portal:'cc-portal',Vendedor:'cc-vend','Médico direto':'cc-med'};
+
+function isOverdue(c){ return ['cotacao','aprovacao'].includes(c.stage)&&daysBetween(c.dataenvio||c.datacot)>(params.bad||5); }
+function timerChip(d,done,t){ if(d===null) return '<span style="color:var(--text3)">—</span>'; const cl=done?'t-done':d<=t?'t-ok':d<=t*1.5?'t-warn':'t-bad'; return `<span class="timer ${cl}">${done?'✓':d<=t?'🟢':d<=t*1.5?'🟡':'🔴'} ${d}d</span>`; }
+function stageTimer(c){
+  const ref=c.dataenvio||c.datacot;
+  if(c.stage==='pago') return timerChip(daysBetween(c.datacot,c.datapgto),true,20);
+  if(c.stage==='negado') return timerChip(daysBetween(ref,c.dataresp),true,params.dias||5);
+  if(c.stage==='autorizado') return timerChip(daysBetween(c.dataaut),false,7);
+  if(['cotacao','aprovacao'].includes(c.stage)){
+    const d=daysBetween(ref);
+    if(d===null) return '—';
+    const bad=params.bad||5, warn=params.warn||3;
+    const cl=d>=bad?'dc-bad':d>=warn?'dc-warn':'dc-ok';
+    const ic=d>=bad?'🔴':d>=warn?'🟡':'🟢';
+    const prazo=c.prazo?` / ${params.dias||5}d`:'';
+    return `<span class="days-counter ${cl}">${ic} ${d}d sem resposta${prazo}</span>`;
+  }
+  return '—';
+}
+
+function hasRecolher(c){ return c.itens&&c.itens.some(it=>parseFloat(it.qtd_recolher||0)>0); }
+function updateBadges(){ const ov=cotacoes.filter(c=>isOverdue(c)).length; const b=document.getElementById('badge-ov'); b.textContent=ov; b.style.display=ov?'':'none'; }
+function refreshAll(){
+  renderDash();
+  const ap=document.querySelector('.page.active')?.id;
+  if(ap==='page-cotacoes') renderCot();
+  else if(ap==='page-mapa') renderMapa();
+  else if(ap==='page-faturamento') renderFat();
+  else if(ap==='page-expedicao') renderExp();
+  else if(ap==='page-usuarios') renderUsers();
+}
+
+// ─── NAVIGATION ──────────────────────────────────────────────────────────────
+function showPage(name,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el) el.classList.add('active');
+  if(name==='dash') renderDash();
+  if(name==='cotacoes') renderCot();
+  if(name==='mapa') renderMapa();
+  if(name==='faturamento') renderFat();
+  if(name==='usuarios') renderUsers();
+  if(name==='cadastros') renderCadastros();
+  if(name==='expedicao') renderExp();
+  if(name==='relatorios') renderRelatorios();
+}
+function quickNav(t){
+  if(t==='hoje'||t==='urgencia'){ showPage('mapa',document.querySelector('[onclick*="mapa"]')); renderMapa(t); }
+  else if(t==='overdue'){ showPage('cotacoes',document.querySelector('[onclick*="cotacoes"]')); document.getElementById('cf-stage').value=''; renderCot('overdue'); }
+  else if(t==='recolher'){ showPage('faturamento',document.querySelector('[onclick*="faturamento"]')); renderFat('recolher'); }
+}
+
+// ─── DASHBOARD ───────────────────────────────────────────────────────────────
+function renderDash(){
+  document.getElementById('dash-date').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
+  const today=new Date().toISOString().split('T')[0];
+  const todayCir=mapaItems.filter(m=>m.datacir===today).length;
+  const pendCot=cotacoes.filter(c=>['cotacao','aprovacao'].includes(c.stage)).length;
+  const autorizado=cotacoes.filter(c=>c.stage==='autorizado').length;
+  const negado=cotacoes.filter(c=>c.stage==='negado').length;
+  const faturado=cotacoes.filter(c=>['faturado','pago'].includes(c.stage)).length;
+  const ov=cotacoes.filter(c=>isOverdue(c)).length;
+  const recolher=cotacoes.filter(c=>hasRecolher(c)).length;
+  const semData=mapaItems.filter(m=>!m.datacir&&m.numcot).length;
+  const vlAb=cotacoes.filter(c=>!['pago','negado'].includes(c.stage)).reduce((a,c)=>a+(parseFloat(c.vlcot)||0),0);
+  const vlPago=cotacoes.filter(c=>c.stage==='pago').reduce((a,c)=>a+(parseFloat(c.vlap)||0),0);
+
+  document.getElementById('dash-cards').innerHTML=`
+    <div class="card c-cyan"><div class="card-lbl">Cirurgias hoje</div><div class="card-val">${todayCir}</div><div class="card-sub">no mapa</div></div>
+    <div class="card c-warn"><div class="card-lbl">Cot. pendentes</div><div class="card-val">${pendCot}</div><div class="card-sub">aguardando resposta</div></div>
+    <div class="card c-green"><div class="card-lbl">Autorizadas</div><div class="card-val">${autorizado}</div><div class="card-sub">prontas para faturar</div></div>
+    <div class="card c-red"><div class="card-lbl">Negadas</div><div class="card-val">${negado}</div><div class="card-sub">para recurso</div></div>
+    <div class="card c-purple"><div class="card-lbl">Faturadas/Pagas</div><div class="card-val">${faturado}</div><div class="card-sub">concluídas</div></div>
+    <div class="card c-warn"><div class="card-lbl">Atraso +3d</div><div class="card-val">${ov}</div><div class="card-sub">sem resposta</div></div>
+    <div class="card c-blue"><div class="card-lbl">A recolher</div><div class="card-val">${recolher}</div><div class="card-sub">materiais pendentes</div></div>
+    <div class="card ${semData>0?'c-red':'c-green'}"><div class="card-lbl">⚠ Sem data</div><div class="card-val">${semData}</div><div class="card-sub">cirurgias autorizadas</div></div>
+    <div class="card c-warn" style="min-width:160px"><div class="card-lbl">Em aberto</div><div class="card-val" style="font-size:17px">${fm(vlAb)}</div><div class="card-sub">a receber</div></div>
+    <div class="card c-green" style="min-width:160px"><div class="card-lbl">Total pago</div><div class="card-val" style="font-size:17px">${fm(vlPago)}</div><div class="card-sub">confirmado</div></div>
+  `;
+
+  const proxCir=[...mapaItems].filter(m=>m.datacir&&m.datacir>=today).sort((a,b)=>a.datacir.localeCompare(b.datacir)).slice(0,5);
+  const pendList=cotacoes.filter(c=>['cotacao','aprovacao'].includes(c.stage)).slice(0,5);
+
+  document.getElementById('dash-tables').innerHTML=`
+    <div>
+      <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px">Próximas cirurgias</div>
+      ${proxCir.length?`<div class="tw"><table><thead><tr><th>Data/Hora</th><th>Paciente</th><th>Hospital</th><th>Status</th><th>Cot. vinc.</th></tr></thead>
+      <tbody>${proxCir.map(m=>`<tr class="cr" onclick="openMapaDetail('${m.id}')">
+        <td style="font-family:var(--mono);font-size:10px">${fd(m.datacir)}${m.hora?' '+m.hora:''}</td>
+        <td>${m.paciente}</td><td>${m.hospital||'—'}</td>
+        <td><span class="chip ${CIR_CLASS[m.status]||''}">${m.status}</span></td>
+        <td style="font-family:var(--mono);font-size:10px;color:var(--accent)">${m.numcot||'—'}</td>
+      </tr>`).join('')}</tbody></table></div>`
+      :`<div class="empty" style="padding:24px"><div class="empty-icon">🗓</div>Nenhuma agendada</div>`}
+    </div>
+    <div>
+      <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px">Cotações pendentes</div>
+      ${pendList.length?`<div class="tw"><table><thead><tr><th>ID</th><th>Paciente</th><th>Etapa</th><th>⏱</th><th>Cotado</th></tr></thead>
+      <tbody>${pendList.map(c=>`<tr class="cr ${isOverdue(c)?'row-late':''}" onclick="openCotDetail('${c.id}')">
+        <td><span class="id-tag">${c.id}</span></td><td>${c.paciente}</td>
+        <td><span class="chip ${STAGE_CLASS[c.stage]}">${STAGE_LABEL[c.stage]}</span></td>
+        <td>${stageTimer(c)}</td><td class="money m-warn">${fm(c.vlcot)}</td>
+      </tr>`).join('')}</tbody></table></div>`
+      :`<div class="empty" style="padding:24px"><div class="empty-icon">✓</div>Nenhuma pendente</div>`}
+    </div>
+  `;
+}
+
+// ─── COTAÇÕES ─────────────────────────────────────────────────────────────────
+function clearF(t){
+  if(t==='cot'){ ['cf-s','cf-stage','cf-hosp','cf-resp'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; }); renderCot(); }
+  if(t==='mapa'){ ['mf-s','mf-status','mf-hosp'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; }); renderMapa(); }
+  if(t==='exp'){ ['ef-s','ef-status','ef-tipo','ef-hosp'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; }); renderExp(); }
+}
+
+function renderCot(filter){
+  const s=(document.getElementById('cf-s')?.value||'').toLowerCase();
+  const st=document.getElementById('cf-stage')?.value||'';
+  const h=document.getElementById('cf-hosp')?.value||'';
+  const resp=document.getElementById('cf-resp')?.value||'';
+  const hospitals=[...new Set(cotacoes.map(c=>c.hospital).filter(Boolean))];
+  const resps=[...new Set(cotacoes.map(c=>c.resp).filter(Boolean))];
+  const hSel=document.getElementById('cf-hosp'), rSel=document.getElementById('cf-resp');
+  if(hSel){ const hv=hSel.value; hSel.innerHTML='<option value="">Todos hospitais</option>'+hospitals.map(x=>`<option ${x===hv?'selected':''}>${x}</option>`).join(''); }
+  if(rSel){ const rv=rSel.value; rSel.innerHTML='<option value="">Todos responsáveis</option>'+resps.map(x=>`<option ${x===rv?'selected':''}>${x}</option>`).join(''); }
+
+  const vf=getVendedorFilter();
+  let data=cotacoes.filter(c=>{
+    if(vf&&c.vendedor!==vf&&c.resp!==vf) return false; // vendedor sees only their own
+    if(filter==='overdue') return isOverdue(c);
+    const ms=!s||[c.paciente,c.medico,c.proc,c.id].some(x=>x?.toLowerCase().includes(s));
+    return ms&&(!st||c.stage===st)&&(!h||c.hospital===h)&&(!resp||c.resp===resp);
+  });
+
+  document.getElementById('cot-body').innerHTML=data.length?data.map(c=>`<tr class="cr ${isOverdue(c)?'row-late':''}" onclick="openCotDetail('${c.id}')">
+    <td><span class="id-tag">${c.id}</span></td>
+    <td>${c.paciente||'—'}</td>
+    <td>${c.hospital||'—'}</td>
+    <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.proc||'—'}</td>
+    <td style="color:var(--text2)">${c.convenio||'—'}</td>
+    <td>${c.portal?`<span class="canal-chip cc-portal">${c.portal}</span>`:'<span style="color:var(--text3)">—</span>'}</td>
+    <td><span class="chip ${STAGE_CLASS[c.stage]}">${STAGE_LABEL[c.stage]}</span></td>
+    <td>${stageTimer(c)}</td>
+    <td class="money m-warn">${fm(c.vlcot)}</td>
+    <td class="money m-green">${c.vlap?fm(c.vlap):'—'}</td>
+    <td style="font-family:var(--mono);font-size:10px;color:var(--green)">${fd(c.dataaut)}</td>
+    <td style="color:var(--text2)">${c.resp||'—'}</td>
+    <td onclick="event.stopPropagation()">${canDo('cot')?`<button class="btn btn-ghost btn-xs" onclick="openCotForm('${c.id}')">✏</button>`:''}</td>
+  </tr>`).join(''):`<tr><td colspan="13"><div class="empty"><div class="empty-icon">📋</div>Nenhuma cotação</div></td></tr>`;
+
+  const totCot=data.reduce((a,c)=>a+(parseFloat(c.vlcot)||0),0);
+  const totAp=data.reduce((a,c)=>a+(parseFloat(c.vlap)||0),0);
+  document.getElementById('sum-cot').textContent=totCot>0?fm(totCot):'';
+  document.getElementById('sum-ap').textContent=totAp>0?fm(totAp):'';
+  document.getElementById('cot-count').textContent=`${data.length} cotações`;
+  document.getElementById('cot-total').textContent=totCot>0?`Total cotado: ${fm(totCot)}`:'';
+}
+
+// ─── MAPA ─────────────────────────────────────────────────────────────────────
+function setMapaView(v){ mapaView=v; renderMapa(); }
+
+function renderMapa(filter){
+  const s=(document.getElementById('mf-s')?.value||'').toLowerCase();
+  const st=document.getElementById('mf-status')?.value||'';
+  const h=document.getElementById('mf-hosp')?.value||'';
+  const hospitals=[...new Set(mapaItems.map(m=>m.hospital).filter(Boolean))];
+  const hSel=document.getElementById('mf-hosp');
+  if(hSel){ const hv=hSel.value; hSel.innerHTML='<option value="">Todos hospitais</option>'+hospitals.map(x=>`<option ${x===hv?'selected':''}>${x}</option>`).join(''); }
+  const today=new Date().toISOString().split('T')[0];
+  const vfm=getVendedorFilter();
+  let data=mapaItems.filter(m=>{
+    if(vfm){ const cv=m.numcot?cotacoes.find(x=>x.id===m.numcot):null; if(!cv||(cv.vendedor!==vfm&&cv.resp!==vfm)) return false; }
+    if(filter==='hoje') return m.datacir===today;
+    if(filter==='urgencia') return m.status==='Urgência';
+    const ms=!s||[m.paciente,m.medico,m.proc,m.assessora,m.numcot].some(x=>x?.toLowerCase().includes(s));
+    return ms&&(!st||m.status===st)&&(!h||m.hospital===h);
+  }).sort((a,b)=>{ if(!a.datacir&&!b.datacir) return 0; if(!a.datacir) return 1; if(!b.datacir) return -1; return a.datacir.localeCompare(b.datacir); });
+
+  const cont=document.getElementById('mapa-cont');
+  const cardsCont=document.getElementById('mapa-cards');
+  if(!data.length){ cont.innerHTML=`<div class="empty"><div class="empty-icon">🗓</div>Nenhuma cirurgia</div>`; if(cardsCont) cardsCont.innerHTML=''; return; }
+
+  // Mobile: renderizar cards
+  const isMobile=window.innerWidth<=768;
+  if(isMobile && cardsCont){
+    cont.innerHTML='';
+    cardsCont.innerHTML=data.map(m=>{
+      const cotVinc=m.numcot?cotacoes.find(x=>x.id===m.numcot):null;
+      const itens=(m.itens_mapa&&m.itens_mapa.length>0)?m.itens_mapa:(cotVinc?.itens||[]);
+      const cls=getMapaClass(m);
+      const expSt=m.expedicao?.status||'';
+      const expColor={Entregue:'var(--green)',Enviado:'var(--cyan)',Separado:'var(--warn)',Pendente:'var(--text3)'}[expSt]||'var(--text3)';
+      return `<div class="mapa-card ${cls}" onclick="openMapaDetail('${m.id}')">
+        <div class="mapa-card-top">
+          <div>
+            <div class="mapa-card-pac">${m.paciente||'—'}</div>
+            <div style="font-size:10px;color:var(--text3);font-family:var(--mono)">${m.id}</div>
+          </div>
+          ${getStatusBadge(m)}
+        </div>
+        <div class="mapa-card-info">
+          📅 <b>${fd(m.datacir)}${m.hora?' '+m.hora:''}</b><br>
+          🏥 ${m.hospital||'—'}<br>
+          👨‍⚕️ ${m.medico||'—'} · 👩 ${m.assessora||'—'}
+          ${expSt?`<br>🚚 <span style="color:${expColor}">${expSt}</span>`:''}
+          ${itens.length?`<br>📦 ${itens.length} ${itens.length===1?'material':'materiais'}`:''}
+          ${m.obs?`<br><span style="color:var(--warn);font-size:10px">⚠ ${m.obs}</span>`:''}
+        </div>
+        <div class="mapa-card-actions">
+          ${canDo('mapa')?`<button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openMapaForm('${m.id}')">✏ Editar</button>`:''}
+          ${canDo('exp')?`<button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openExpForm('${m.id}')">🚚 Exp.</button>`:''}
+        </div>
+      </div>`;
+    }).join('');
+    return;
+  }
+  if(cardsCont) cardsCont.innerHTML='';
+
+  if(mapaView==='grid'){
+    cont.innerHTML=`<div class="mapa-grid">${data.map(m=>{
+      const cotVinc=m.numcot?cotacoes.find(x=>x.id===m.numcot):null;
+      const cls=getMapaClass(m);
+      // Show materials from linked cotação
+      const itens=cotVinc?.itens||[];
+      const matAut=itens.filter(it=>parseFloat(it.qtd_aut||0)>0);
+      const matEnv=itens.filter(it=>parseFloat(it.qtd||0)>0);
+      const matHtml=itens.length>0?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+        ${matAut.length>0?
+          `<div style="font-size:9px;color:var(--green);letter-spacing:.5px;margin-bottom:3px">✓ AUTORIZADOS (${matAut.length})</div>
+          ${matAut.slice(0,3).map(it=>`<div style="font-size:10px;color:var(--text2);margin-bottom:1px">• ${it.ref||''}${it.ref?' — ':''}${it.desc||'—'} <b style="color:var(--green)">${it.qtd_aut}</b></div>`).join('')}
+          ${matAut.length>3?`<div style="font-size:10px;color:var(--text3)">+${matAut.length-3} mais</div>`:''}` :
+          `<div style="font-size:9px;color:var(--warn);letter-spacing:.5px;margin-bottom:3px">📦 ENVIADOS (${matEnv.length})</div>
+          ${matEnv.slice(0,3).map(it=>`<div style="font-size:10px;color:var(--text2);margin-bottom:1px">• ${it.ref||''}${it.ref?' — ':''}${it.desc||'—'} <b style="color:var(--warn)">x${it.qtd}</b></div>`).join('')}
+          ${matEnv.length>3?`<div style="font-size:10px;color:var(--text3)">+${matEnv.length-3} mais</div>`:''}`}
+      </div>`:'';
+      return `<div class="mc ${cls}" onclick="openMapaDetail('${m.id}')">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+          <span style="font-family:var(--mono);font-size:9px;color:var(--text3)">${m.id}</span>
+          ${getStatusBadge(m)}
+        </div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:2px">${m.paciente||'—'}</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.proc||'—'}</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:3px">📅 <b style="color:var(--text)">${fd(m.datacir)}${m.hora?' '+m.hora:''}</b></div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:3px">🏥 <b style="color:var(--text)">${m.hospital||'—'}</b></div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:3px">👨‍⚕️ ${m.medico||'—'} · 👩 ${m.assessora||'—'}</div>
+        ${m.numcot?`<div style="margin-top:6px;font-size:10px;color:var(--accent);font-family:var(--mono)">🔗 ${m.numcot}${cotVinc?' · <span class=\"chip '+STAGE_CLASS[cotVinc.stage]+'\">'+STAGE_LABEL[cotVinc.stage]+'</span>':''}</div>`:''}
+        ${matHtml}
+        ${hasRecolher({itens:cotVinc?.itens})?`<div style="margin-top:4px;font-size:10px;color:var(--warn)">📦 Materiais a recolher</div>`:''}
+      </div>`;
+    }).join('')}</div>`;
+  } else {
+    cont.innerHTML=`<div class="tw"><table><thead><tr>
+      <th>ID</th><th>Data/Hora</th><th>Paciente</th><th>Médico</th><th>Assessora</th>
+      <th>Hospital</th><th>Procedimento</th><th>Cot. vinc.</th><th>Status</th><th></th>
+    </tr></thead><tbody>${data.map(m=>`<tr class="cr" onclick="openMapaDetail('${m.id}')">
+      <td><span class="id-tag">${m.id}</span></td>
+      <td style="font-family:var(--mono);font-size:10px;white-space:nowrap">${fd(m.datacir)}${m.hora?' '+m.hora:''}</td>
+      <td>${m.paciente||'—'}</td><td style="color:var(--text2)">${m.medico||'—'}</td>
+      <td style="color:var(--text2)">${m.assessora||'—'}</td>
+      <td>${m.hospital||'—'}</td>
+      <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.proc||'—'}</td>
+      <td style="font-family:var(--mono);font-size:10px;color:var(--accent)">${m.numcot||'—'}</td>
+      <td><span class="chip ${CIR_CLASS[m.status]||''}">${m.status}</span></td>
+      <td onclick="event.stopPropagation()">${canDo('mapa')?`<button class="btn btn-ghost btn-xs" onclick="openMapaForm('${m.id}')">✏</button>`:''}</td>
+    </tr>`).join('')}</tbody></table></div>`;
+  }
+}
+
+// ─── FATURAMENTO ──────────────────────────────────────────────────────────────
+function renderFat(filter){
+  const vff=getVendedorFilter();
+  let data=cotacoes.filter(c=>{
+    if(vff&&c.vendedor!==vff&&c.resp!==vff) return false;
+    return ['autorizado','faturado','pago'].includes(c.stage);
+  });
+  if(filter==='recolher') data=cotacoes.filter(c=>{ if(vff&&c.vendedor!==vff&&c.resp!==vff) return false; return hasRecolher(c); });
+
+  const vlAut=data.filter(c=>c.stage==='autorizado').reduce((a,c)=>a+(parseFloat(c.vlap)||0),0);
+  const vlFat=data.filter(c=>['faturado','pago'].includes(c.stage)).reduce((a,c)=>a+(parseFloat(c.vlap)||0),0);
+  const vlPago=data.filter(c=>c.stage==='pago').reduce((a,c)=>a+(parseFloat(c.vlap)||0),0);
+  const nRecolher=data.filter(c=>hasRecolher(c)).length;
+
+  document.getElementById('fat-cards').innerHTML=`
+    <div class="card c-green"><div class="card-lbl">Autorizado p/ faturar</div><div class="card-val">${data.filter(c=>c.stage==='autorizado').length}</div><div class="card-sub">${fm(vlAut)}</div></div>
+    <div class="card c-purple"><div class="card-lbl">Em faturamento</div><div class="card-val">${data.filter(c=>c.stage==='faturado').length}</div><div class="card-sub">aguardando pgto</div></div>
+    <div class="card c-green" style="min-width:160px"><div class="card-lbl">Total pago</div><div class="card-val" style="font-size:17px">${fm(vlPago)}</div></div>
+    <div class="card c-warn"><div class="card-lbl">A recolher</div><div class="card-val">${nRecolher}</div><div class="card-sub">materiais pendentes</div></div>
+  `;
+
+  document.getElementById('fat-body').innerHTML=data.length?data.map(c=>{
+    const recolher=c.itens&&c.itens.some(it=>parseFloat(it.qtd_recolher||0)>0);
+    return `<tr class="cr" onclick="openCotDetail('${c.id}')">
+      <td><span class="id-tag">${c.id}</span></td>
+      <td>${c.paciente||'—'}</td><td>${c.hospital||'—'}</td>
+      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.proc||'—'}</td>
+      <td style="color:var(--text2)">${c.convenio||'—'}</td>
+      <td style="font-family:var(--mono);font-size:10px;color:var(--green)">${fd(c.dataaut)}</td>
+      <td><span class="chip ${STAGE_CLASS[c.stage]}">${STAGE_LABEL[c.stage]}</span></td>
+      <td class="money m-green">${c.vlap?fm(c.vlap):'—'}</td>
+      <td style="color:${c.faturar==='Sim'?'var(--green)':'var(--text3)'}">${c.faturar||'—'}</td>
+      <td style="font-family:var(--mono);font-size:10px">${fd(c.datafat)}</td>
+      <td style="font-family:var(--mono);font-size:10px;color:${c.datapgto?'var(--green)':'var(--warn)'}">${fd(c.datapgto)}</td>
+      <td>${recolher?'<span style="color:var(--warn);font-size:11px">⚠ pendente</span>':'<span style="color:var(--text3);font-size:11px">—</span>'}</td>
+      <td onclick="event.stopPropagation()">${canDo('fat')||canDo('pgto')?`<button class="btn btn-ghost btn-xs" onclick="openCotForm('${c.id}')">✏</button>`:''}</td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="13"><div class="empty"><div class="empty-icon">$</div>Nenhum registro</div></td></tr>`;
+
+  document.getElementById('fat-count').textContent=`${data.length} registros`;
+  document.getElementById('fat-total').textContent=`Pago: ${fm(vlPago)} · Faturado: ${fm(vlFat)}`;
+}
+
+// ─── COT FORM ─────────────────────────────────────────────────────────────────
+const STAGE_NEXT={cotacao:'aprovacao',aprovacao:'autorizado',autorizado:'faturado',faturado:'pago',pago:'pago',negado:'negado'};
+const PORTAIS=['Bionexo','Opme Nexo','TISS','Portal Unimed','Portal Amil','Portal Bradesco','Portal SulAmérica','Portal Hapvida','E-mail direto do plano','Outro'];
+const CANAIS=['WhatsApp','E-mail','Telefone','Portal','Vendedor','Médico direto'];
+
+function openCotForm(id){
+  if(isRO()){ showToast('Acesso somente leitura'); return; }
+  editCotId=id||null;
+  const c=id?cotacoes.find(x=>x.id===id):null;
+  document.getElementById('cot-form-title').textContent=id?'Editar Cotação':'Nova Cotação';
+  const role=currentUser?.perfil;
+  const isG=role==='gestor';
+  const canCot=isG||['cotacao','mapa'].includes(role);
+  const canFat=isG||role==='mapa';
+  const canPgto=isG||role==='diretor';
+  const today=new Date().toISOString().split('T')[0];
+  const isSt=s=>c?.stage===s;
+
+  // Build items rows (pre-surgery)
+  const itens=c?.itens||[];
+  const ST='background:var(--s3);border:1px solid var(--border);color:var(--text);padding:3px 6px;border-radius:4px;font-size:11px;font-family:var(--mono);width:100%;outline:none;';
+  const itensRows=itens.map((it,i)=>{
+    const dis=canCot?'':'disabled';
+    const del=canCot?`<td><button type="button" class="btn btn-danger btn-xs" onclick="removeItem(${i})">✕</button></td>`:'';
+    return `<tr>
+      <td><input type="text" id="it-ref-${i}" value="${it.ref||''}" style="${ST}" oninput="acMaterial(${i})" ${dis} placeholder="Ref. ou descrição"></td>
+      <td><input type="text" id="it-desc-${i}" value="${it.desc||''}" style="${ST}" ${dis}></td>
+      <td><input type="text" id="it-fab-${i}" value="${it.fab||''}" style="${ST}" ${dis}></td>
+      <td><input type="text" id="it-anvisa-${i}" value="${it.anvisa||''}" style="${ST}" ${dis}></td>
+      <td><input type="number" id="it-qtd-${i}" value="${it.qtd||1}" min="0" step="1" oninput="calcItems()" style="${ST}text-align:right;width:55px" ${dis}></td>
+      <td><input type="number" id="it-vunit-${i}" value="${it.vunit||''}" step="0.01" oninput="calcItems()" style="${ST}text-align:right" ${dis}></td>
+      <td><input type="number" id="it-vtotal-${i}" value="${it.vtotal||''}" readonly style="${ST}text-align:right;color:var(--green);font-weight:600"></td>
+      <td><input type="text" id="it-obs-${i}" value="${it.obs||''}" style="${ST}" ${dis}></td>
+      ${del}
+    </tr>`;
+  }).join('');
+  const grandTotal=itens.reduce((a,it)=>a+(parseFloat(it.vtotal)||0),0);
+
+  // Pos-surgery items (quantities used/returned/etc)
+  const itensPos=c?.itens||[];
+  const posDis=canFat?'':'disabled';
+  const posRows=itensPos.map((it,i)=>`<tr>
+    <td style="color:var(--text2);font-size:10px">${it.ref||'—'}</td>
+    <td style="color:var(--text2);font-size:10px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${it.desc||'—'}</td>
+    <td><input type="number" id="pos-qtd_env-${i}" value="${it.qtd_env??it.qtd??''}" style="${ST}text-align:right;width:50px" ${posDis}></td>
+    <td><input type="number" id="pos-qtd_uso-${i}" value="${it.qtd_uso??''}" step="1" min="0" oninput="calcPos()" style="${ST}text-align:right;width:50px" ${posDis}></td>
+    <td><input type="number" id="pos-qtd_aut-${i}" value="${it.qtd_aut??''}" step="1" min="0" style="${ST}text-align:right;width:50px" ${posDis}></td>
+    <td><input type="number" id="pos-vaut-${i}" value="${it.vaut??''}" step="0.01" oninput="calcPos()" style="${ST}text-align:right" ${posDis}></td>
+    <td><input type="number" id="pos-qtd_dev-${i}" value="${it.qtd_dev??''}" step="1" min="0" style="${ST}text-align:right;width:50px" ${posDis}></td>
+    <td><input type="number" id="pos-qtd_rec-${i}" value="${it.qtd_recolher??''}" step="1" min="0" style="${ST}text-align:right;width:50px;${parseFloat(it.qtd_recolher||0)>0?'color:var(--warn);font-weight:600':''}" ${posDis}></td>
+  </tr>`).join('');
+  const vlAutTotal=itensPos.reduce((a,it)=>a+(parseFloat(it.vaut||0)*(parseFloat(it.qtd_aut||0)||1)||0),0);
+
+  let html=`
+  <div class="fsec">
+    <div class="fsec-title">Identificação</div>
+    <div class="frow">
+      <div class="fg"><label>ID</label><input type="text" id="f-id" value="${c?.id||''}" readonly style="color:var(--text3)"></div>
+      <div class="fg"><label>Responsável *</label><input type="text" id="f-resp" value="${c?.resp||''}" ${canCot?'':'disabled'}></div>
+      <div class="fg"><label>Como chegou</label><select id="f-canal" ${canCot?'':'disabled'}>
+        <option value="">—</option>${CANAIS.map(x=>`<option ${c?.canal===x?'selected':''}>${x}</option>`).join('')}
+      </select></div>
+      <div class="fg"><label>Portal de cotação</label><select id="f-portal" ${canCot?'':'disabled'}>
+        <option value="">Nenhum</option>${PORTAIS.map(x=>`<option ${c?.portal===x?'selected':''}>${x}</option>`).join('')}
+      </select></div>
+      <div class="fg"><label>Nº Cotação</label><input type="text" id="f-numcot" value="${c?.numcot||''}" ${canCot?'':'disabled'}></div>
+    </div>
+  </div>
+  <div class="fsec">
+    <div class="fsec-title">Paciente e Médico</div>
+    <div class="frow">
+      <div class="fg"><label>Paciente *</label><input type="text" id="f-pac" value="${c?.paciente||''}" ${canCot?'':'disabled'}></div>
+      <div class="fg"><label>Médico *</label><input type="text" id="f-med" value="${c?.medico||''}" ${canCot?'':'disabled'}></div>
+      <div class="fg"><label>Vendedor</label>
+        <input type="text" id="f-vendedor" value="${c?.vendedor||''}" ${canCot?'':'disabled'} list="vend-list" placeholder="Nome do vendedor">
+        <datalist id="vend-list">${users.filter(u=>u.perfil==='vendedor').map(u=>`<option value="${u.nome}">`).join('')}</datalist>
+      </div>
+    </div>
+  </div>
+  <div class="fsec">
+    <div class="fsec-title">Instituição e Procedimento</div>
+    <div class="frow">
+      <div class="fg"><label>Hospital *</label><input type="text" id="f-hosp" value="${c?.hospital||''}" ${canCot?'':'disabled'}></div>
+      <div class="fg"><label>Convênio</label><input type="text" id="f-conv" value="${c?.convenio||''}" ${canCot?'':'disabled'}></div>
+      <div class="fg"><label>Tipo</label><div class="rrow">
+        ${['Convênio','Particular','Fat. Direto','Órgão Público'].map(t=>`<label class="rl"><input type="radio" name="tipo" value="${t}" ${c?.tipo===t||(!c?.tipo&&t==='Convênio')?'checked':''} ${canCot?'':'disabled'}> ${t}</label>`).join('')}
+      </div></div>
+      <div class="fg"><label>Forma de pagamento</label><select id="f-formapgto" ${canCot?'':'disabled'}>
+        <option value="">—</option>
+        <option ${c?.formapgto==='Convênio/Plano'?'selected':''}>Convênio/Plano</option>
+        <option ${c?.formapgto==='Particular - À vista'?'selected':''}>Particular - À vista</option>
+        <option ${c?.formapgto==='Particular - PIX'?'selected':''}>Particular - PIX</option>
+        <option ${c?.formapgto==='Particular - Cartão crédito'?'selected':''}>Particular - Cartão crédito</option>
+        <option ${c?.formapgto==='Particular - Parcelado'?'selected':''}>Particular - Parcelado</option>
+        <option ${c?.formapgto==='Compra direta'?'selected':''}>Compra direta</option>
+        <option ${c?.formapgto==='Órgão Público'?'selected':''}>Órgão Público</option>
+        <option ${c?.formapgto==='Outro'?'selected':''}>Outro</option>
+      </select></div>
+    </div>
+    <div class="frow" style="margin-top:10px">
+      <div class="fg full"><label>Procedimento *</label><input type="text" id="f-proc" value="${c?.proc||''}" ${canCot?'':'disabled'}></div>
+    </div>
+  </div>
+
+  <!-- ITENS / MATERIAIS -->
+  <div class="fsec">
+    <div class="fsec-title" style="display:flex;justify-content:space-between;align-items:center">
+      <span>Materiais / Itens Cotados</span>
+      ${canCot?`<button type="button" class="btn btn-green btn-xs" onclick="addItem()">+ Adicionar item</button>`:''}
+    </div>
+    <div style="overflow-x:auto;margin-top:8px">
+    <table class="itbl" style="min-width:760px">
+      <thead class="itbl-phase"><tr>
+        <th style="min-width:90px">Referência</th>
+        <th style="min-width:150px">Descrição do produto</th>
+        <th style="min-width:90px">Fabricante</th>
+        <th style="min-width:100px">Reg. ANVISA</th>
+        <th style="width:55px">Qtd</th>
+        <th style="width:90px">Vl. Unit.</th>
+        <th style="width:90px">Vl. Total</th>
+        <th style="min-width:90px">Observação</th>
+        ${canCot?'<th style="width:28px"></th>':''}
+      </tr></thead>
+      <tbody id="items-tbody">${itensRows}</tbody>
+    </table>
+    </div>
+    <div class="items-total">
+      <div class="it-sum"><div class="it-sum-lbl">Total cotado</div><div class="it-sum-val" id="items-grand-total">${fm(grandTotal)}</div></div>
+    </div>
+  </div>
+
+  <!-- COTAÇÃO FINANCEIRA -->
+  <div class="fsec">
+    <div class="fsec-title">Cotação Financeira e Datas</div>
+    <div class="frow">
+      <div class="fg"><label>Valor cotado (R$)</label><input type="number" id="f-vlcot" value="${c?.vlcot||''}" step="0.01" ${canCot?'':'disabled'}></div>
+      <div class="fg"><label>Data cotação</label><input type="date" id="f-datacot" value="${c?.datacot||today}" ${canCot?'':'disabled'}></div>
+      <div class="fg"><label>Envio ao plano</label><input type="date" id="f-dataenvio" value="${c?.dataenvio||today}" ${canCot?'':'disabled'}></div>
+      <div class="fg"><label>Prazo resposta</label><input type="date" id="f-prazo" value="${c?.prazo||''}" ${canCot?'':'disabled'}></div>
+    </div>
+  </div>`;
+
+  // Aprovação section (always show when editing)
+  if(c){
+    html+=`<div class="fsec" style="background:rgba(245,166,35,.04);border-radius:8px;padding:12px;border:1px solid rgba(245,166,35,.15)">
+      <div class="fsec-title" style="color:var(--warn)">⭐ Aprovação do Plano</div>
+      <div class="frow">
+        <div class="fg"><label>Status cotação</label><select id="f-stage" ${canCot?'':'disabled'}>
+          ${['cotacao','aprovacao','autorizado','negado'].map(s=>`<option value="${s}" ${c?.stage===s?'selected':''}>${STAGE_LABEL[s]}</option>`).join('')}
+        </select></div>
+        <div class="fg"><label>Data resposta plano</label><input type="date" id="f-dataresp" value="${c?.dataresp||''}" ${canCot?'':'disabled'}></div>
+        <div class="fg"><label>Data autorização *</label><input type="date" id="f-dataaut" value="${c?.dataaut||''}" ${canCot?'':'disabled'} title="Obrigatória quando autorizado"></div>
+        <div class="fg"><label>Valor aprovado (R$)</label><input type="number" id="f-vlap" value="${c?.vlap||''}" step="0.01" ${canCot?'':'disabled'}></div>
+      </div>
+    </div>`;
+  } else {
+    html+=`<input type="hidden" id="f-stage" value="cotacao">`;
+  }
+
+  // Pós-cirurgia — só aparece quando status é autorizado/faturado/pago
+  if(c&&['autorizado','faturado','pago'].includes(c.stage)&&itensPos.length>0){
+    html+=`<div class="fsec" style="background:rgba(45,212,160,.04);border-radius:8px;padding:12px;border:1px solid rgba(45,212,160,.2)">
+      <div class="fsec-title" style="color:var(--green)">📦 Pós-Cirurgia — Controle de Materiais</div>
+      <div style="overflow-x:auto;margin-top:8px">
+      <table class="itbl" style="min-width:700px">
+        <thead class="itbl-phase2"><tr>
+          <th style="min-width:80px">Referência</th>
+          <th style="min-width:130px">Descrição</th>
+          <th style="width:60px">Qtd enviada</th>
+          <th style="width:60px">Qtd utilizada</th>
+          <th style="width:70px">Qtd aut. plano</th>
+          <th style="width:95px">Vl. aut. unit.</th>
+          <th style="width:60px">Qtd devolvida</th>
+          <th style="width:70px" style="color:var(--warn)">A recolher</th>
+        </tr></thead>
+        <tbody>${posRows}</tbody>
+      </table>
+      </div>
+      <div class="items-total">
+        <div class="it-sum"><div class="it-sum-lbl">Total autorizado plano</div><div class="it-sum-val m-green" id="pos-grand-total">${fm(vlAutTotal)}</div></div>
+      </div>
+    </div>`;
+  }
+
+  // Faturamento section
+  if(c&&['autorizado','faturado','pago'].includes(c.stage)){
+    html+=`<div class="fsec" style="background:rgba(155,113,245,.04);border-radius:8px;padding:12px;border:1px solid rgba(155,113,245,.2)">
+      <div class="fsec-title" style="color:var(--purple)">$ Faturamento</div>
+      <div class="frow">
+        <div class="fg"><label>Autorizado para faturar</label><div class="rrow">
+          <label class="rl"><input type="radio" name="faturar" value="Sim" ${c?.faturar==='Sim'?'checked':''} ${canFat?'':'disabled'}> Sim</label>
+          <label class="rl"><input type="radio" name="faturar" value="Não" ${c?.faturar!=='Sim'?'checked':''} ${canFat?'':'disabled'}> Não</label>
+        </div></div>
+        <div class="fg"><label>Data faturamento</label><input type="date" id="f-datafat" value="${c?.datafat||''}" ${canFat?'':'disabled'}></div>
+      </div>
+    </div>`;
+  }
+
+  // Pagamento section
+  if(c&&['faturado','pago'].includes(c.stage)){
+    html+=`<div class="fsec" style="background:rgba(45,212,160,.06);border-radius:8px;padding:12px;border:1px solid rgba(45,212,160,.25)">
+      <div class="fsec-title" style="color:var(--green)">✓ Pagamento</div>
+      <div class="frow">
+        <div class="fg"><label>Etapa</label><select id="f-stage-pgto" ${canPgto?'':'disabled'}>
+          <option value="faturado" ${c?.stage==='faturado'?'selected':''}>Faturado</option>
+          <option value="pago" ${c?.stage==='pago'?'selected':''}>Pago</option>
+        </select></div>
+        <div class="fg"><label>Data pagamento recebido</label><input type="date" id="f-datapgto" value="${c?.datapgto||''}" ${canPgto?'':'disabled'}></div>
+      </div>
+    </div>`;
+  }
+
+  html+=`<div class="fsec"><div class="fsec-title">Observações</div><div class="fg"><textarea id="f-obs">${c?.obs||''}</textarea></div></div>`;
+
+  document.getElementById('cot-form-body').innerHTML=html;
+  if(!editCotId) document.getElementById('f-id').value=genCotId();
+
+  // Update button labels
+  const advBtn=document.getElementById('btn-advance-cot');
+  const stLabel={cotacao:'Enviar ao plano →',aprovacao:'Confirmar aprovação →',autorizado:'Enviar para faturamento →',faturado:'Confirmar pagamento →',pago:'💾 Salvar',negado:'💾 Salvar'};
+  advBtn.textContent=c?stLabel[c.stage]||'Salvar →':'💾 Salvar Cotação';
+  document.getElementById('btn-save-cot').style.display=c?'flex':'none';
+
+  document.getElementById('cot-overlay').classList.add('open');
+  // Setup hospital autocomplete
+  setTimeout(()=>{
+    setupHospAcField('f-hosp');
+    setupHospAcField('f-conv');
+  }, 300);
+}
+function closeCotForm(){ document.getElementById('cot-overlay').classList.remove('open'); }
+
+function addItem(){
+  const tbody=document.getElementById('items-tbody'); if(!tbody) return;
+  const i=tbody.querySelectorAll('tr').length;
+  const ST='background:var(--s3);border:1px solid var(--border);color:var(--text);padding:3px 6px;border-radius:4px;font-size:11px;font-family:var(--mono);width:100%;outline:none;';
+  const tr=document.createElement('tr');
+  tr.innerHTML=`
+    <td><input type="text" id="it-ref-${i}" style="${ST}" placeholder="Ref. ou descrição" oninput="acMaterial(${i})"></td>
+    <td><input type="text" id="it-desc-${i}" style="${ST}" placeholder="Descrição"></td>
+    <td><input type="text" id="it-fab-${i}" style="${ST}" placeholder="Fabricante"></td>
+    <td><input type="text" id="it-anvisa-${i}" style="${ST}" placeholder="ANVISA"></td>
+    <td><input type="number" id="it-qtd-${i}" value="1" min="0" step="1" oninput="calcItems()" style="${ST}text-align:right;width:55px"></td>
+    <td><input type="number" id="it-vunit-${i}" step="0.01" oninput="calcItems()" style="${ST}text-align:right"></td>
+    <td><input type="number" id="it-vtotal-${i}" readonly style="${ST}text-align:right;color:var(--green);font-weight:600"></td>
+    <td><input type="text" id="it-obs-${i}" style="${ST}" placeholder="Obs."></td>
+    <td><button type="button" class="btn btn-danger btn-xs" onclick="this.closest('tr').remove();calcItems()">✕</button></td>`;
+  tbody.appendChild(tr); tr.querySelector('input').focus();
+}
+function removeItem(i){ const el=document.getElementById('it-ref-'+i); if(el) el.closest('tr').remove(); calcItems(); }
+function calcItems(){
+  const rows=document.querySelectorAll('#items-tbody tr'); let grand=0;
+  rows.forEach((_,i)=>{
+    const qtd=parseFloat(document.getElementById('it-qtd-'+i)?.value)||0;
+    const vunit=parseFloat(document.getElementById('it-vunit-'+i)?.value)||0;
+    const tot=qtd*vunit;
+    const vtEl=document.getElementById('it-vtotal-'+i); if(vtEl) vtEl.value=tot>0?tot.toFixed(2):'';
+    grand+=tot;
+  });
+  const gtEl=document.getElementById('items-grand-total');
+  if(gtEl) gtEl.textContent='R$ '+grand.toLocaleString('pt-BR',{minimumFractionDigits:2});
+}
+function calcPos(){
+  const c=editCotId?cotacoes.find(x=>x.id===editCotId):null;
+  const n=(c?.itens||[]).length; let grand=0;
+  for(let i=0;i<n;i++){
+    const qtd=parseFloat(document.getElementById('pos-qtd_aut-'+i)?.value)||0;
+    const vunit=parseFloat(document.getElementById('pos-vaut-'+i)?.value)||0;
+    grand+=qtd*vunit;
+  }
+  const el=document.getElementById('pos-grand-total');
+  if(el) el.textContent='R$ '+grand.toLocaleString('pt-BR',{minimumFractionDigits:2});
+}
+function collectItems(){
+  const rows=document.querySelectorAll('#items-tbody tr'); const items=[];
+  rows.forEach((_,i)=>{
+    const ref=document.getElementById('it-ref-'+i)?.value||'';
+    const desc=document.getElementById('it-desc-'+i)?.value||'';
+    const fab=document.getElementById('it-fab-'+i)?.value||'';
+    const qtd=parseFloat(document.getElementById('it-qtd-'+i)?.value)||0;
+    const vunit=parseFloat(document.getElementById('it-vunit-'+i)?.value)||0;
+    const vtotal=parseFloat(document.getElementById('it-vtotal-'+i)?.value)||0;
+    const obs=document.getElementById('it-obs-'+i)?.value||'';
+    const anvisa=document.getElementById('it-anvisa-'+i)?.value||'';
+    if(desc||ref) items.push({ref,desc,fab,anvisa,qtd,vunit,vtotal,obs});
+  });
+  return items;
+}
+function collectPos(existingItens){
+  return (existingItens||[]).map((it,i)=>({
+    ...it,
+    qtd_env:parseFloat(document.getElementById('pos-qtd_env-'+i)?.value)??it.qtd,
+    qtd_uso:parseFloat(document.getElementById('pos-qtd_uso-'+i)?.value??''),
+    qtd_aut:parseFloat(document.getElementById('pos-qtd_aut-'+i)?.value??''),
+    vaut:parseFloat(document.getElementById('pos-vaut-'+i)?.value??''),
+    qtd_dev:parseFloat(document.getElementById('pos-qtd_dev-'+i)?.value??''),
+    qtd_recolher:parseFloat(document.getElementById('pos-qtd_rec-'+i)?.value??''),
+  }));
+}
+
+async function saveCot(advance){
+  const g=id=>document.getElementById(id)?.value||'';
+  if(!g('f-pac')||!g('f-hosp')||!g('f-proc')){ showToast('⚠ Preencha Paciente, Hospital e Procedimento'); return; }
+  const oldC=editCotId?cotacoes.find(x=>x.id===editCotId):null;
+  const newItens=collectItems();
+  const allItens=newItens.length>0?newItens:(oldC?.itens||[]);
+  const posItens=oldC&&['autorizado','faturado','pago'].includes(oldC.stage)?collectPos(allItens):allItens;
+
+  // Determine stage
+  let stage=g('f-stage');
+  const stagePgto=document.getElementById('f-stage-pgto')?.value;
+  if(stagePgto) stage=stagePgto;
+  if(advance&&oldC){ stage=stage||STAGE_NEXT[oldC.stage]; }
+
+  const obj={
+    id:g('f-id'), resp:g('f-resp'), vendedor:g('f-vendedor'), canal:g('f-canal'), portal:g('f-portal'), numcot:g('f-numcot'),
+    paciente:g('f-pac'), medico:g('f-med'), hospital:g('f-hosp'), convenio:g('f-conv'),
+    tipo:document.querySelector('input[name="tipo"]:checked')?.value||'Convênio',
+    formapgto:g('f-formapgto'),
+    proc:g('f-proc'), itens:posItens,
+    vlcot:parseFloat(g('f-vlcot'))||posItens.reduce((a,it)=>a+(parseFloat(it.vtotal)||0),0)||0,
+    datacot:g('f-datacot'), dataenvio:g('f-dataenvio'), prazo:g('f-prazo'),
+    stage:stage||'cotacao',
+    dataresp:g('f-dataresp'), dataaut:g('f-dataaut'),
+    vlap:parseFloat(g('f-vlap'))||0,
+    faturar:document.querySelector('input[name="faturar"]:checked')?.value||'Não',
+    datafat:g('f-datafat'), datapgto:g('f-datapgto'),
+    obs:g('f-obs'),
+  };
+  if(editCotId){
+    const old=cotacoes.find(x=>x.id===editCotId);
+    const detail=old?.stage!==obj.stage?`Etapa: ${STAGE_LABEL[old?.stage]} → ${STAGE_LABEL[obj.stage]}`:'Dados atualizados';
+    cotacoes[cotacoes.findIndex(x=>x.id===editCotId)]=obj;
+    addLog('Cotação editada', obj.id, detail);
+  } else {
+    cotacoes.push(obj);
+    addLog('Cotação criada', obj.id, `${obj.paciente} · ${obj.proc}`);
+  }
+  closeCotForm(); await saveData();
+  // Auto-create mapa when cotação becomes autorizado
+  if(obj.stage==='autorizado'){
+    const existing=mapaItems.find(x=>x.numcot===obj.id);
+    if(!existing){
+      const newMapa={
+        id:genMapaId(), datacir:obj.datacir||'', hora:obj.hora||'',
+        status:obj.datacir?'Eletivo':'Eletivo',
+        paciente:obj.paciente, medico:obj.medico,
+        assessora:'', hospital:obj.hospital, convenio:obj.convenio,
+        proc:obj.proc, tipovic:'cotacao', numcot:obj.id, obs:''
+      };
+      mapaItems.push(newMapa);
+      addLog('Mapa criado automaticamente', newMapa.id, `Cotação ${obj.id} autorizada`);
+      if(!obj.datacir){
+        showToast('⚠ Cotação autorizada! Agendar data da cirurgia no mapa');
+      } else {
+        showToast('✓ Cotação autorizada e adicionada ao mapa!');
+      }
+    }
+  } else {
+    showToast(editCotId?'✓ Cotação atualizada':'✓ Cotação criada');
+  }
+  refreshAll(); updateBadges();
+}
+
+// ─── MAPA FORM ────────────────────────────────────────────────────────────────
+function openMapaForm(id){
+  if(!canDo('mapa')){ showToast('Sem permissão'); return; }
+  editMapaId=id||null;
+  const m=id?mapaItems.find(x=>x.id===id):null;
+  document.getElementById('mapa-form-title').textContent=id?'Editar Cirurgia':'Nova Cirurgia';
+
+  const cotVinc=m?.numcot?cotacoes.find(c=>c.id===m.numcot):null;
+  let linkedHtml='';
+  if(cotVinc){
+    linkedHtml=`<div class="linked-cot"><div class="linked-cot-lbl">✓ Cotação vinculada</div>
+      <div style="font-size:12px"><b>${cotVinc.id}</b> · ${cotVinc.paciente} · ${cotVinc.proc}</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:4px">Status: <span class="chip ${STAGE_CLASS[cotVinc.stage]}">${STAGE_LABEL[cotVinc.stage]}</span> · Autorizado: ${fm(cotVinc.vlap)} · Dt. Aut.: ${fd(cotVinc.dataaut)}</div>
+    </div>`;
+  }
+
+  document.getElementById('mapa-form-body').innerHTML=`
+  <div class="fsec">
+    <div class="fsec-title">Dados da Cirurgia</div>
+    <div class="frow">
+      <div class="fg"><label>ID</label><input type="text" id="mf-id" value="${m?.id||''}" readonly style="color:var(--text3)"></div>
+      <div class="fg"><label>Data *</label><input type="date" id="mf-datacir" value="${m?.datacir||''}"></div>
+      <div class="fg"><label>Hora</label><input type="time" id="mf-hora" value="${m?.hora||''}"></div>
+      <div class="fg"><label>Status</label><select id="mf-status">
+        ${['Eletivo','Urgência','Adiada','Cancelada','Realizado','Ag. Faturamento','Faturada'].map(s=>`<option ${m?.status===s?'selected':''}>${s}</option>`).join('')}
+      </select></div>
+    </div>
+    <div class="frow" style="margin-top:10px">
+      <div class="fg"><label>Paciente</label><input type="text" id="mf-pac" value="${m?.paciente||''}"></div>
+      <div class="fg"><label>Médico</label><input type="text" id="mf-med" value="${m?.medico||''}"></div>
+      <div class="fg"><label>Assessora</label>
+        <select id="mf-assessora">
+          <option value="Sem assessora">Sem assessora</option>
+          ${assessores.map(a=>`<option value="${a.nome}" ${m?.assessora===a.nome?'selected':''}>${a.nome}</option>`).join('')}
+          ${m?.assessora&&m.assessora!=='Sem assessora'&&!assessores.find(a=>a.nome===m.assessora)?`<option value="${m.assessora}" selected>${m.assessora}</option>`:''}
+        </select></div>
+    </div>
+    <div class="frow" style="margin-top:10px">
+      <div class="fg"><label>Hospital</label><input type="text" id="mf-hospital" value="${m?.hospital||''}"></div>
+      <div class="fg"><label>Convênio</label><input type="text" id="mf-conv" value="${m?.convenio||''}"></div>
+      <div class="fg full"><label>Procedimento</label><input type="text" id="mf-proc" value="${m?.proc||''}"></div>
+    </div>
+  </div>
+  <div class="fsec">
+    <div class="fsec-title">Vinculação</div>
+    <div class="frow">
+      <div class="fg"><label>Tipo de vínculo</label>
+        <select id="mf-tipovic" onchange="updateVincType()">
+          <option value="">Sem vínculo</option>
+          <option value="cotacao" ${m?.tipovic==='cotacao'||(!m?.tipovic&&m?.numcot)?'selected':''}>Cotação (COT-XXXX)</option>
+          <option value="urgencia" ${m?.tipovic==='urgencia'?'selected':''}>Urgência</option>
+          <option value="particular" ${m?.tipovic==='particular'?'selected':''}>Particular</option>
+          <option value="orgao" ${m?.tipovic==='orgao'?'selected':''}>Órgão Público</option>
+          <option value="outro" ${m?.tipovic==='outro'?'selected':''}>Outro</option>
+        </select>
+      </div>
+      <div class="fg" id="mf-vinc-field">
+        <label id="mf-vinc-label">Nº da Cotação (ID)</label>
+        <input type="text" id="mf-numcot" value="${m?.numcot||''}" placeholder="Ex: COT-0001" oninput="buscarCotMapa()">
+      </div>
+    </div>
+    <div id="mapa-cot-result">${linkedHtml}</div>
+  </div>
+  <div class="fsec">
+    <div class="fsec-title" style="display:flex;justify-content:space-between;align-items:center">
+      <span>Materiais / Itens</span>
+      <button type="button" class="btn btn-green btn-xs" onclick="addMapaItem()">＋ Adicionar item</button>
+    </div>
+    <div style="font-size:10px;color:var(--text3);margin-bottom:8px">
+      ${m?.numcot&&cotVinc?'Materiais importados da cotação vinculada. Edite se necessário ou adicione itens extras.':'Digite os materiais que serão enviados para esta cirurgia.'}
+    </div>
+    <div style="overflow-x:auto">
+    <table class="itbl" style="min-width:700px">
+      <thead class="itbl-phase"><tr>
+        <th style="min-width:90px">Referência</th>
+        <th style="min-width:150px">Descrição</th>
+        <th style="min-width:100px">Nome no campo</th>
+        <th style="min-width:90px">Fabricante</th>
+        <th style="width:55px">Qtd env.</th>
+        <th style="width:90px">Vl. Unit.</th>
+        <th style="width:90px">Vl. Total</th>
+        <th style="min-width:80px">Obs.</th>
+        <th style="width:28px"></th>
+      </tr></thead>
+      <tbody id="mapa-items-tbody">
+        ${(()=>{
+          const ST='background:var(--s3);border:1px solid var(--border);color:var(--text);padding:3px 6px;border-radius:4px;font-size:11px;font-family:var(--mono);width:100%;outline:none;';
+          const srcItens=(m?.itens_mapa&&m.itens_mapa.length>0)?m.itens_mapa:(cotVinc?.itens||[]);
+          return srcItens.map((it,i)=>`<tr>
+            <td style="position:relative"><input type="text" id="mi-ref-${i}" value="${it.ref||''}" style="${ST}" placeholder="Ref. ou descrição" oninput="acMateriaisMapa(${i})" onblur="setTimeout(()=>hideMapaAc(${i}),200)"></td>
+            <td><input type="text" id="mi-desc-${i}" value="${it.desc||''}" style="${ST}" placeholder="Descrição"></td>
+            <td><input type="text" id="mi-nrua-${i}" value="${it.nome_rua||''}" style="${ST}" placeholder="Ex: kit esfera"></td>
+            <td><input type="text" id="mi-fab-${i}" value="${it.fab||''}" style="${ST}" placeholder="Fabricante"></td>
+            <td><input type="number" id="mi-qtd-${i}" value="${it.qtd_env??it.qtd??1}" min="0" step="1" oninput="calcMapaItems()" style="${ST}text-align:right;width:55px"></td>
+            <td><input type="number" id="mi-vunit-${i}" value="${it.vunit||''}" step="0.01" oninput="calcMapaItems()" style="${ST}text-align:right"></td>
+            <td><input type="number" id="mi-vtotal-${i}" value="${it.vtotal||''}" readonly style="${ST}text-align:right;color:var(--green);font-weight:600"></td>
+            <td><input type="text" id="mi-obs-${i}" value="${it.obs||''}" style="${ST}" placeholder="Obs."></td>
+            <td><button type="button" class="btn btn-danger btn-xs" onclick="this.closest('tr').remove();calcMapaItems()">✕</button></td>
+          </tr>`).join('');
+        })()}
+      </tbody>
+    </table>
+    </div>
+    <div class="items-total">
+      <span class="items-total-lbl">Total:</span>
+      <span class="items-total-val" id="mapa-grand-total">${(()=>{
+        const src=(m?.itens_mapa&&m.itens_mapa.length>0)?m.itens_mapa:(cotVinc?.itens||[]);
+        const tot=src.reduce((a,it)=>a+(parseFloat(it.vtotal)||0),0);
+        return 'R$ '+tot.toLocaleString('pt-BR',{minimumFractionDigits:2});
+      })()}</span>
+    </div>
+  </div>
+  <div class="fsec">
+    <div class="fsec-title">Observações</div>
+    <div class="fg"><textarea id="mf-obs">${m?.obs||''}</textarea></div>
+  </div>`;
+
+  if(!editMapaId){
+    document.getElementById('mf-id').value=genMapaId();
+    // Clear items table for new cirurgia
+    const tb=document.getElementById('mapa-items-tbody');
+    if(tb) tb.innerHTML='';
+    const gt=document.getElementById('mapa-grand-total');
+    if(gt) gt.textContent='R$ 0,00';
+  }
+  document.getElementById('mapa-overlay').classList.add('open');
+  setTimeout(()=>{
+    setupHospAcField('mf-hospital');
+    setupHospAcField('mf-conv');
+    updateVincType();
+  }, 100);
+}
+function closeMapaForm(){ document.getElementById('mapa-overlay').classList.remove('open'); }
+
+function updateVincType(){
+  const tipo=document.getElementById('mf-tipovic')?.value||'';
+  const field=document.getElementById('mf-vinc-field');
+  const label=document.getElementById('mf-vinc-label');
+  const inp=document.getElementById('mf-numcot');
+  const result=document.getElementById('mapa-cot-result');
+  if(!tipo){ if(field) field.style.display='none'; if(result) result.innerHTML=''; return; }
+  if(field) field.style.display='';
+  if(tipo==='cotacao'){
+    if(label) label.textContent='Nº da Cotação (ID)';
+    if(inp){ inp.placeholder='Ex: COT-0001'; inp.oninput=buscarCotMapa; }
+  } else if(tipo==='urgencia'){
+    if(label) label.textContent='Referência da Urgência';
+    if(inp){ inp.placeholder='Ex: URG-001'; inp.oninput=null; if(result) result.innerHTML=''; }
+  } else if(tipo==='orgao'){
+    if(label) label.textContent='Nº do Empenho';
+    if(inp){ inp.placeholder='Ex: 2024NE001234'; inp.oninput=null; if(result) result.innerHTML=''; }
+  } else {
+    if(label) label.textContent='Referência';
+    if(inp){ inp.placeholder='Número ou referência'; inp.oninput=null; if(result) result.innerHTML=''; }
+  }
+}
+function buscarCotMapa(){
+  const num=document.getElementById('mf-numcot').value.trim().toUpperCase();
+  const el=document.getElementById('mapa-cot-result');
+  if(!num){ el.innerHTML=''; return; }
+  const cot=cotacoes.find(c=>c.id===num);
+  if(!cot){ el.innerHTML=`<div style="color:var(--danger);font-size:12px;margin-top:8px">Cotação "${num}" não encontrada</div>`; return; }
+  el.innerHTML=`<div class="linked-cot"><div class="linked-cot-lbl">✓ Cotação encontrada</div>
+    <div style="font-size:12px"><b>${cot.id}</b> · ${cot.paciente} · ${cot.proc}</div>
+    <div style="font-size:11px;color:var(--text2);margin-top:4px">Status: <span class="chip ${STAGE_CLASS[cot.stage]}">${STAGE_LABEL[cot.stage]}</span> · Autorizado: ${fm(cot.vlap)} · Dt. Aut.: ${fd(cot.dataaut)}</div>
+    <button type="button" class="btn btn-green btn-xs" style="margin-top:8px" onclick="importarDadosCot('${cot.id}')">⬇ Importar dados da cotação</button>
+  </div>`;
+}
+
+function importarDadosCot(id){
+  const cot=cotacoes.find(c=>c.id===id); if(!cot) return;
+  const g=n=>document.getElementById(n);
+  if(!g('mf-pac').value) g('mf-pac').value=cot.paciente||'';
+  if(!g('mf-med').value) g('mf-med').value=cot.medico||'';
+  if(!g('mf-hospital').value) g('mf-hospital').value=cot.hospital||'';
+  if(!g('mf-conv').value) g('mf-conv').value=cot.convenio||'';
+  if(!g('mf-proc').value) g('mf-proc').value=cot.proc||'';
+  // Populate materials from cotação
+  if(cot.itens&&cot.itens.length>0) popularMateriaisMapa(cot.itens);
+  showToast('✓ Dados e materiais importados da cotação');
+}
+
+function popularMateriaisMapa(itens){
+  const tbody=document.getElementById('mapa-items-tbody'); if(!tbody) return;
+  const ST='background:var(--s3);border:1px solid var(--border);color:var(--text);padding:3px 6px;border-radius:4px;font-size:11px;font-family:var(--mono);width:100%;outline:none;';
+  tbody.innerHTML='';
+  itens.forEach((it,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><input type="text" id="mi-ref-${i}" value="${it.ref||''}" style="${ST}" placeholder="Ref."></td>
+      <td><input type="text" id="mi-desc-${i}" value="${it.desc||''}" style="${ST}" placeholder="Descrição" oninput="acMateriaisMapa(${i})"></td>
+      <td><input type="text" id="mi-nrua-${i}" value="${it.nome_rua||''}" style="${ST}" placeholder="Ex: kit esfera"></td>
+      <td><input type="text" id="mi-fab-${i}" value="${it.fab||''}" style="${ST}" placeholder="Fabricante"></td>
+      <td><input type="number" id="mi-qtd-${i}" value="${it.qtd_env??it.qtd??1}" min="0" step="1" oninput="calcMapaItems()" style="${ST}text-align:right;width:55px"></td>
+      <td><input type="number" id="mi-vunit-${i}" value="${it.vunit||''}" step="0.01" oninput="calcMapaItems()" style="${ST}text-align:right"></td>
+      <td><input type="number" id="mi-vtotal-${i}" value="${it.vtotal||''}" readonly style="${ST}text-align:right;color:var(--green);font-weight:600"></td>
+      <td><input type="text" id="mi-obs-${i}" value="${it.obs||''}" style="${ST}" placeholder="Obs."></td>
+      <td><button type="button" class="btn btn-danger btn-xs" onclick="this.closest('tr').remove();calcMapaItems()">✕</button></td>`;
+    tbody.appendChild(tr);
+  });
+  calcMapaItems();
+}
+
+async function saveMapa(){
+  const g=id=>document.getElementById(id)?.value||'';
+  // No required fields in mapa - all optional
+  const obj={
+    id:g('mf-id'), datacir:g('mf-datacir'), hora:g('mf-hora'),
+    status:g('mf-status')||'Eletivo', paciente:g('mf-pac'), medico:g('mf-med'),
+    assessora:g('mf-assessora'), hospital:g('mf-hospital'), convenio:g('mf-conv'),
+    proc:g('mf-proc'), tipovic:g('mf-tipovic')||'', numcot:g('mf-numcot').trim().toUpperCase()||'', itens_mapa:collectMapaItems(), obs:g('mf-obs'),
+  };
+  if(editMapaId){
+    const oldM=mapaItems.find(x=>x.id===editMapaId);
+    const det=oldM?.status!==obj.status?`Status: ${oldM?.status} → ${obj.status}`:'Dados atualizados';
+    mapaItems[mapaItems.findIndex(x=>x.id===editMapaId)]=obj;
+    addLog('Cirurgia editada', obj.id, det);
+  } else {
+    mapaItems.push(obj);
+    addLog('Cirurgia criada', obj.id, `${obj.paciente} · ${fd(obj.datacir)}`);
+  }
+  closeMapaForm(); await saveData();
+  showToast(editMapaId?'✓ Cirurgia atualizada':'✓ Cirurgia criada');
+  refreshAll();
+}
+
+// ─── DETAIL ───────────────────────────────────────────────────────────────────
+function openCotDetail(id){
+  const c=cotacoes.find(x=>x.id===id); if(!c) return;
+  const isNeg=c.stage==='negado';
+  const tER=c.dataenvio&&c.dataresp?daysBetween(c.dataenvio,c.dataresp):null;
+  const tRF=c.dataresp&&c.datafat?daysBetween(c.dataresp,c.datafat):null;
+  const tFP=c.datafat&&c.datapgto?daysBetween(c.datafat,c.datapgto):null;
+  const tC=c.datacot&&c.datapgto?daysBetween(c.datacot,c.datapgto):null;
+  function ch(d,done,t){ if(d===null) return '—'; const cl=done?'t-done':d<=t?'t-ok':d<=t*1.5?'t-warn':'t-bad'; return `<span class="timer ${cl}">${done?'✓':d<=t?'🟢':d<=t*1.5?'🟡':'🔴'} ${d}d</span>`; }
+  const tl=[
+    {l:'Cotação criada',d:c.datacot},{l:'Enviado ao plano',d:c.dataenvio},
+    {l:'Resposta do plano',d:c.dataresp},{l:'Autorização',d:c.dataaut},
+    {l:'Faturado',d:c.datafat},{l:'Pagamento recebido',d:c.datapgto},
+  ];
+  const dates=tl.map(x=>x.d);
+  const tlHtml=tl.map((s,i)=>{
+    const isA=!s.d&&(i===0||(i>0&&tl[i-1].d));
+    const dc=isNeg&&i===1?'skip':isA?'active':s.d?'done':'pending';
+    const dur=i>0&&dates[i]&&dates[i-1]?`<span class="tl-dur">+${daysBetween(dates[i-1],dates[i])}d</span>`:'';
+    return `<div class="tl-step"><div class="tl-dot ${dc}"></div><div class="tl-lbl ${dc}">${s.l}${dur}</div><div class="tl-date">${s.d?fd(s.d):'<em style="color:var(--text3)">pendente</em>'}</div></div>`;
+  }).join('');
+
+  // Items table in detail
+  const itens=c.itens||[];
+  const itensHtml=itens.length?`
+    <table class="itbl" style="min-width:600px">
+      <thead class="itbl-phase"><tr><th>Ref.</th><th>Descrição</th><th>Fab.</th><th>ANVISA</th><th style="text-align:right">Qtd</th><th style="text-align:right">Vl.Unit</th><th style="text-align:right">Total</th></tr></thead>
+      <tbody>${itens.map(it=>`<tr>
+        <td>${it.ref||'—'}</td><td>${it.desc||'—'}</td><td style="color:var(--text2)">${it.fab||'—'}</td>
+        <td style="font-family:var(--mono);font-size:10px;color:var(--cyan)">${it.anvisa||'—'}</td>
+        <td style="text-align:right;font-family:var(--mono)">${it.qtd||0}</td>
+        <td style="text-align:right;font-family:var(--mono)">${it.vunit?fm(it.vunit):'—'}</td>
+        <td style="text-align:right;font-family:var(--mono);color:var(--green)">${it.vtotal?fm(it.vtotal):'—'}</td>
+      </tr>`).join('')}</tbody>
+    </table>
+    ${['autorizado','faturado','pago'].includes(c.stage)?`
+    <div style="margin-top:12px;font-size:9px;font-weight:700;text-transform:uppercase;color:var(--green);letter-spacing:1px;margin-bottom:6px">Pós-Cirurgia</div>
+    <table class="itbl" style="min-width:600px">
+      <thead class="itbl-phase2"><tr><th>Ref.</th><th>Enviada</th><th>Utilizada</th><th>Aut. plano</th><th>Vl. aut.</th><th>Devolvida</th><th style="color:var(--warn)">Recolher</th></tr></thead>
+      <tbody>${itens.map(it=>`<tr>
+        <td>${it.ref||'—'}</td>
+        <td style="text-align:right;font-family:var(--mono)">${it.qtd_env??it.qtd??'—'}</td>
+        <td style="text-align:right;font-family:var(--mono)">${it.qtd_uso??'—'}</td>
+        <td style="text-align:right;font-family:var(--mono)">${it.qtd_aut??'—'}</td>
+        <td style="text-align:right;font-family:var(--mono);color:var(--green)">${it.vaut?fm(it.vaut):'—'}</td>
+        <td style="text-align:right;font-family:var(--mono)">${it.qtd_dev??'—'}</td>
+        <td style="text-align:right;font-family:var(--mono);color:${parseFloat(it.qtd_recolher||0)>0?'var(--warn)':'var(--text3)'};font-weight:${parseFloat(it.qtd_recolher||0)>0?'600':'400'}">${it.qtd_recolher??'—'}</td>
+      </tr>`).join('')}</tbody>
+    </table>`:''}`:'<div style="color:var(--text3);font-size:11px">Nenhum item cadastrado</div>';
+
+  document.getElementById('detail-panel').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
+      <div>
+        <div style="font-size:10px;color:var(--text3);margin-bottom:4px">${c.id}${c.numcot?' · '+c.numcot:''}</div>
+        <div style="font-size:17px;font-weight:600">${c.paciente}</div>
+        <div style="margin-top:6px;display:flex;gap:5px;flex-wrap:wrap">
+          <span class="chip ${STAGE_CLASS[c.stage]}">${STAGE_LABEL[c.stage]}</span>
+          ${c.canal?`<span class="canal-chip ${CANAL_CLASS[c.canal]||''}">${c.canal}</span>`:''}
+          ${c.portal?`<span class="canal-chip cc-portal">${c.portal}</span>`:''}
+          ${isOverdue(c)?'<span style="color:var(--warn);font-size:10px">⚠ +3d</span>':''}
+        </div>
+      </div>
+      <button class="xbtn" onclick="closeDetail()">×</button>
+    </div>
+    <div class="section-box">
+      <div class="section-box-title">Linha do Tempo</div>
+      <div class="tl">${tlHtml}</div>
+    </div>
+    <div class="section-box">
+      <div class="section-box-title">Tempos</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><div style="font-size:9px;color:var(--text3);margin-bottom:3px;text-transform:uppercase">Envio→Resposta</div>${ch(tER,!!c.dataresp,5)}</div>
+        <div><div style="font-size:9px;color:var(--text3);margin-bottom:3px;text-transform:uppercase">Resposta→Fatura</div>${ch(tRF,!!c.datafat,7)}</div>
+        <div><div style="font-size:9px;color:var(--text3);margin-bottom:3px;text-transform:uppercase">Fatura→Pgto</div>${ch(tFP,!!c.datapgto,30)}</div>
+        <div><div style="font-size:9px;color:var(--text3);margin-bottom:3px;text-transform:uppercase">Ciclo Total</div>${ch(tC,!!c.datapgto,20)}</div>
+      </div>
+    </div>
+    <div class="df"><span class="df-lbl">Médico</span><span class="df-val">${c.medico||'—'}</span></div>
+    <div class="df"><span class="df-lbl">Hospital</span><span class="df-val">${c.hospital||'—'}</span></div>
+    <div class="df"><span class="df-lbl">Convênio/Tipo</span><span class="df-val">${c.convenio||'—'} (${c.tipo||'—'})</span></div>
+    <div class="df"><span class="df-lbl">Procedimento</span><span class="df-val">${c.proc||'—'}</span></div>
+    <div class="df"><span class="df-lbl">Dt. Autorização</span><span class="df-val" style="color:var(--green);font-family:var(--mono)">${fd(c.dataaut)}</span></div>
+    <div class="df"><span class="df-lbl">Responsável</span><span class="df-val">${c.resp||'—'}</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0">
+      <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px">
+        <div style="font-size:9px;color:var(--text3);margin-bottom:4px;text-transform:uppercase">Valor Cotado</div>
+        <div style="font-family:var(--mono);font-size:15px;color:var(--warn)">${fm(c.vlcot)}</div>
+      </div>
+      <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px">
+        <div style="font-size:9px;color:var(--text3);margin-bottom:4px;text-transform:uppercase">Valor Aprovado</div>
+        <div style="font-family:var(--mono);font-size:15px;color:var(--green)">${c.vlap?fm(c.vlap):'—'}</div>
+      </div>
+    </div>
+    <div class="section-box">
+      <div class="section-box-title">Materiais / Itens</div>
+      <div style="overflow-x:auto">${itensHtml}</div>
+    </div>
+    ${c.obs?`<div class="section-box"><div class="section-box-title">Observações</div><div style="font-size:11px;color:var(--text2)">${c.obs}</div></div>`:''}
+    <div class="section-box" style="margin-top:12px">
+      <div class="section-box-title">📋 Log de Alterações</div>
+      <div id="log-panel-${c.id}"></div>
+    </div>
+    ${canDo('cot')||canDo('fat')||canDo('pgto')?`<div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-primary" style="flex:1" onclick="closeDetail();openCotForm('${c.id}')">✏ Editar / Avançar</button>
+      ${currentUser?.perfil==='gestor'?`<button class="btn btn-danger btn-sm" onclick="deleteCot('${c.id}')">🗑</button>`:''}
+    </div>`:'<div style="margin-top:14px;font-size:11px;color:var(--text3);text-align:center">Somente visualização</div>'}
+  `;
+  document.getElementById('detail-overlay').classList.add('open');
+  // Render log
+  setTimeout(()=>renderLog('log-panel-'+id), 50);
+}
+
+function openMapaDetail(id){
+  const m=mapaItems.find(x=>x.id===id); if(!m) return;
+  const cotVinc=m.numcot?cotacoes.find(c=>c.id===m.numcot):null;
+  document.getElementById('detail-panel').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
+      <div>
+        <div style="font-size:10px;color:var(--text3);margin-bottom:4px">${m.id}</div>
+        <div style="font-size:17px;font-weight:600">${m.paciente}</div>
+        <div style="margin-top:6px"><span class="chip ${CIR_CLASS[m.status]||''}">${m.status}</span></div>
+      </div>
+      <button class="xbtn" onclick="closeDetail()">×</button>
+    </div>
+    <div class="df"><span class="df-lbl">Data/Hora</span><span class="df-val" style="font-family:var(--mono)">${fd(m.datacir)}${m.hora?' '+m.hora:''}</span></div>
+    <div class="df"><span class="df-lbl">Médico</span><span class="df-val">${m.medico||'—'}</span></div>
+    <div class="df"><span class="df-lbl">Assessora</span><span class="df-val">${m.assessora||'—'}</span></div>
+    <div class="df"><span class="df-lbl">Hospital</span><span class="df-val">${m.hospital||'—'}</span></div>
+    <div class="df"><span class="df-lbl">Convênio</span><span class="df-val">${m.convenio||'—'}</span></div>
+    <div class="df"><span class="df-lbl">Procedimento</span><span class="df-val">${m.proc||'—'}</span></div>
+    ${cotVinc?`<div class="section-box" style="margin-top:12px">
+      <div class="section-box-title" style="color:var(--green)">🔗 Cotação Vinculada</div>
+      <div class="df"><span class="df-lbl">ID</span><span class="df-val" style="font-family:var(--mono);color:var(--accent)">${cotVinc.id}</span></div>
+      <div class="df"><span class="df-lbl">Etapa</span><span class="df-val"><span class="chip ${STAGE_CLASS[cotVinc.stage]}">${STAGE_LABEL[cotVinc.stage]}</span></span></div>
+      <div class="df"><span class="df-lbl">Dt. Autorização</span><span class="df-val" style="color:var(--green)">${fd(cotVinc.dataaut)}</span></div>
+      <div class="df"><span class="df-lbl">Vl. Autorizado</span><span class="df-val money m-green">${fm(cotVinc.vlap)}</span></div>
+    </div>`:''}
+    ${m.obs?`<div class="section-box"><div class="section-box-title">Observações</div><div style="font-size:11px;color:var(--text2)">${m.obs}</div></div>`:''}
+    ${canDo('mapa')?`<div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-primary" style="flex:1" onclick="closeDetail();openMapaForm('${m.id}')">✏ Editar</button>
+      ${currentUser?.perfil==='gestor'?`<button class="btn btn-danger btn-sm" onclick="deleteMapa('${m.id}')">🗑</button>`:''}
+    </div>`:''}
+  `;
+  document.getElementById('detail-overlay').classList.add('open');
+}
+
+function closeDetail(e){ if(e&&e.target!==document.getElementById('detail-overlay')) return; document.getElementById('detail-overlay').classList.remove('open'); }
+
+async function deleteCot(id){ if(!confirm('Excluir cotação?')) return; cotacoes=cotacoes.filter(x=>x.id!==id); await saveData(); closeDetail(); refreshAll(); showToast('🗑 Excluído'); }
+async function deleteMapa(id){ if(!confirm('Excluir cirurgia do mapa?')) return; mapaItems=mapaItems.filter(x=>x.id!==id); await saveData(); closeDetail(); renderMapa(); showToast('🗑 Excluído'); }
+
+// ─── USERS ────────────────────────────────────────────────────────────────────
+const ROLE_LABEL={cotacao:'Cotação',mapa:'Mapa + Faturamento',logistica:'Logística',estoque:'Estoque',vendedor:'Vendedor',gerente:'Gerente',diretor:'Diretor',gestor:'Gestor'};
+const ROLE_COLOR={cotacao:'var(--accent)',mapa:'var(--green)',logistica:'var(--cyan)',estoque:'var(--purple)',vendedor:'var(--warn)',gerente:'var(--warn)',diretor:'var(--warn)',gestor:'var(--danger)'};
+
+function renderUsers(){
+  document.getElementById('users-grid').innerHTML=users.map(u=>`<div class="uc">
+    <div class="uc-top">
+      <div class="uc-av" style="background:${ROLE_COLOR[u.perfil]}22;color:${ROLE_COLOR[u.perfil]}">${u.nome.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase()}</div>
+      <div><div class="uc-name">${u.nome}</div><div class="uc-role">${ROLE_LABEL[u.perfil]||u.perfil}</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:12px">${u.email}</div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-ghost btn-xs" onclick="openUserForm('${u.id}')">✏ Editar</button>
+      ${u.id!==currentUser?.id?`<button class="btn btn-danger btn-xs" onclick="deleteUser('${u.id}')">🗑</button>`:''}
+    </div>
+  </div>`).join('');
+}
+function openUserForm(id){
+  editUserId=id||null;
+  const u=id?users.find(x=>x.id===id):null;
+  document.getElementById('uf-title').textContent=id?'Editar Usuário':'Novo Usuário';
+  ['uf-nome','uf-email','uf-senha','uf-perfil'].forEach(fid=>{ const el=document.getElementById(fid); if(el) el.value=''; });
+  if(u){ document.getElementById('uf-nome').value=u.nome; document.getElementById('uf-email').value=u.email; document.getElementById('uf-senha').value=u.senha; document.getElementById('uf-perfil').value=u.perfil; }
+  document.getElementById('uf-err').style.display='none';
+  document.getElementById('user-overlay').classList.add('open');
+}
+function closeUserForm(){ document.getElementById('user-overlay').classList.remove('open'); }
+async function saveUser(){
+  const nome=document.getElementById('uf-nome').value.trim();
+  const email=document.getElementById('uf-email').value.trim().toLowerCase();
+  const senha=document.getElementById('uf-senha').value;
+  const perfil=document.getElementById('uf-perfil').value;
+  const err=document.getElementById('uf-err');
+  err.style.display='none';
+  if(!nome||!email||!senha||!perfil){ err.textContent='Preencha todos os campos.'; err.style.display='block'; return; }
+  if(senha.length<6){ err.textContent='Senha mínima: 6 caracteres.'; err.style.display='block'; return; }
+  if(users.find(u=>u.email===email&&u.id!==editUserId)){ err.textContent='E-mail já cadastrado.'; err.style.display='block'; return; }
+  if(editUserId){ const idx=users.findIndex(u=>u.id===editUserId); users[idx]={...users[idx],nome,email,senha,perfil}; }
+  else { users.push({id:'u'+Date.now(),nome,email,senha,perfil}); }
+  closeUserForm(); await saveData(); renderUsers(); showToast('✓ Usuário salvo');
+}
+async function deleteUser(id){ if(!confirm('Excluir usuário?')) return; users=users.filter(u=>u.id!==id); await saveData(); renderUsers(); showToast('🗑 Excluído'); }
+
+// ─── EXPORT ───────────────────────────────────────────────────────────────────
+function toCSV(data,cols){ const h=cols.map(c=>c.l).join(';'); const rows=data.map(r=>cols.map(c=>String(typeof c.v==='function'?c.v(r):r[c.k]||'').replace(/;/g,',')).join(';')); return '\uFEFF'+[h,...rows].join('\n'); }
+function downloadCSV(csv,name){ const b=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download=name+'.csv'; a.click(); URL.revokeObjectURL(u); }
+
+function exportCot(){ downloadCSV(toCSV(cotacoes,[
+  {l:'ID',k:'id'},{l:'Paciente',k:'paciente'},{l:'Médico',k:'medico'},{l:'Hospital',k:'hospital'},
+  {l:'Convênio',k:'convenio'},{l:'Procedimento',k:'proc'},{l:'Canal',k:'canal'},{l:'Portal',k:'portal'},
+  {l:'Etapa',v:r=>STAGE_LABEL[r.stage]||r.stage},{l:'Vl.Cotado',v:r=>r.vlcot||''},
+  {l:'Vl.Aprovado',v:r=>r.vlap||''},{l:'Dt.Cotação',v:r=>fd(r.datacot)},{l:'Dt.Autorização',v:r=>fd(r.dataaut)},
+  {l:'Dt.Faturamento',v:r=>fd(r.datafat)},{l:'Dt.Pagamento',v:r=>fd(r.datapgto)},{l:'Responsável',k:'resp'},
+]),'cotacoes_'+new Date().toISOString().split('T')[0]); showToast('✓ Excel exportado'); }
+
+function exportMapa(){ downloadCSV(toCSV(mapaItems,[
+  {l:'ID',k:'id'},{l:'Data',v:m=>fd(m.datacir)},{l:'Hora',k:'hora'},{l:'Paciente',k:'paciente'},
+  {l:'Médico',k:'medico'},{l:'Assessora',k:'assessora'},{l:'Hospital',k:'hospital'},
+  {l:'Procedimento',k:'proc'},{l:'Convênio',k:'convenio'},{l:'Status',k:'status'},{l:'Cot.Vinc.',k:'numcot'},
+]),'mapa_'+new Date().toISOString().split('T')[0]); showToast('✓ Excel exportado'); }
+
+function exportFat(){ const data=cotacoes.filter(c=>['autorizado','faturado','pago'].includes(c.stage));
+downloadCSV(toCSV(data,[
+  {l:'ID',k:'id'},{l:'Paciente',k:'paciente'},{l:'Hospital',k:'hospital'},{l:'Procedimento',k:'proc'},
+  {l:'Convênio',k:'convenio'},{l:'Etapa',v:r=>STAGE_LABEL[r.stage]||r.stage},
+  {l:'Vl.Aprovado',v:r=>r.vlap||''},{l:'Fat.Lib.',k:'faturar'},{l:'Dt.Fat.',v:r=>fd(r.datafat)},{l:'Dt.Pgto.',v:r=>fd(r.datapgto)},
+  {l:'Dt.Aut.',v:r=>fd(r.dataaut)},
+]),'faturamento_'+new Date().toISOString().split('T')[0]); showToast('✓ Excel exportado'); }
+
+
+// ─── LOG ─────────────────────────────────────────────────────────────────────
+function addLog(action, id, detail){
+  const entry={
+    ts: new Date().toISOString(),
+    user: currentUser?.nome||'—',
+    perfil: currentUser?.perfil||'—',
+    action, id, detail
+  };
+  logs.unshift(entry);
+  if(logs.length>500) logs=logs.slice(0,500); // keep last 500
+}
+function renderLog(targetId){
+  const el=document.getElementById(targetId); if(!el) return;
+  const relevant=logs.filter(l=>l.id===targetId).slice(0,20);
+  if(!relevant.length){ el.innerHTML='<div style="color:var(--text3);font-size:11px">Sem alterações registradas</div>'; return; }
+  el.innerHTML=relevant.map(l=>`<div class="log-item">
+    <span class="log-time">${new Date(l.ts).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>
+    <span class="log-user">${l.user}</span>
+    <span class="log-action">${l.action}${l.detail?' — '+l.detail:''}</span>
+  </div>`).join('');
+}
+
+// ─── PARAMS ──────────────────────────────────────────────────────────────────
+function openParamModal(){
+  document.getElementById('param-dias').value=params.dias||5;
+  document.getElementById('param-warn').value=params.warn||3;
+  document.getElementById('param-bad').value=params.bad||5;
+  document.getElementById('param-overlay').classList.add('open');
+}
+function closeParamModal(){ document.getElementById('param-overlay').classList.remove('open'); }
+async function saveParams(){
+  params={
+    dias:parseInt(document.getElementById('param-dias').value)||5,
+    warn:parseInt(document.getElementById('param-warn').value)||3,
+    bad:parseInt(document.getElementById('param-bad').value)||5
+  };
+  document.getElementById('param-dias-badge').textContent=params.dias;
+  closeParamModal();
+  await saveData();
+  showToast('✓ Parâmetros salvos');
+  renderCot();
+}
+
+// ─── AUTOCOMPLETE MATERIAL ────────────────────────────────────────────────────
+function acMaterial(i){
+  const refEl=document.getElementById('it-ref-'+i);
+  const descEl=document.getElementById('it-desc-'+i);
+  const activeEl=document.activeElement;
+  const val=(activeEl?.value||'').toLowerCase();
+  if(!val||val.length<1) return;
+  const matches=materiais.filter(m=>
+    m.ref?.toLowerCase().includes(val)||
+    m.desc?.toLowerCase().includes(val)||
+    m.fab?.toLowerCase().includes(val)
+  ).slice(0,10);
+  const ddId='ac-dd-'+i;
+  let dd=document.getElementById(ddId);
+  if(!dd){
+    dd=document.createElement('div');
+    dd.id=ddId;
+    dd.style.cssText='position:absolute;top:100%;left:0;right:0;background:var(--s2);border:1px solid var(--accent);border-top:none;border-radius:0 0 8px 8px;max-height:220px;overflow-y:auto;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.4);';
+    const wrap=activeEl?.parentElement;
+    if(wrap){ wrap.style.position='relative'; wrap.appendChild(dd); }
+  }
+  if(!matches.length){ dd.style.display='none'; return; }
+  dd.innerHTML=matches.map(m=>`<div style="padding:8px 12px;cursor:pointer;border-bottom:1px solid rgba(37,45,61,.5);font-size:12px;" 
+    onmousedown="fillMaterial(${i},'${m.id}')" 
+    onmouseover="this.style.background='var(--s3)'" 
+    onmouseout="this.style.background=''">
+    <div style="font-family:var(--mono);font-size:10px;color:var(--accent)">${m.ref||'—'}</div>
+    <div style="font-weight:500;color:var(--text)">${m.desc}</div>
+    <div style="font-size:10px;color:var(--text3)">${m.fab||''} ${m.anvisa?'· ANVISA: '+m.anvisa:''} <span style="float:right;color:var(--green)">${m.vunit?fm(m.vunit):''} / ${m.unidade||'UN'}</span></div>
+  </div>`).join('');
+  dd.style.display='block';
+}
+function fillMaterial(i, matId){
+  const m=materiais.find(x=>x.id===matId); if(!m) return;
+  const set=(id,v)=>{ const el=document.getElementById(id); if(el) el.value=v||''; };
+  set('it-ref-'+i, m.ref);
+  set('it-desc-'+i, m.desc);
+  set('it-fab-'+i, m.fab);
+  set('it-anvisa-'+i, m.anvisa);
+  set('it-vunit-'+i, m.vunit||'');
+  calcItems();
+  const dd=document.getElementById('ac-dd-'+i); if(dd) dd.style.display='none';
+}
+document.addEventListener('click', e=>{
+  document.querySelectorAll('[id^="ac-dd-"]').forEach(dd=>{
+    if(!dd.contains(e.target)) dd.style.display='none';
+  });
+});
+
+// ─── AUTOCOMPLETE HOSPITAL ────────────────────────────────────────────────────
+function setupHospAcField(inputId){
+  const inp=document.getElementById(inputId); if(!inp) return;
+  // Remove old listeners by cloning
+  const newInp=inp.cloneNode(true);
+  inp.parentElement.replaceChild(newInp, inp);
+  const inp2=document.getElementById(inputId);
+  // Remove old dropdown
+  const oldDd=document.getElementById('hac-'+inputId); if(oldDd) oldDd.remove();
+  const dd=document.createElement('div');
+  dd.id='hac-'+inputId;
+  dd.style.cssText='position:absolute;top:100%;left:0;right:0;background:var(--s2);border:1px solid var(--accent);border-top:none;border-radius:0 0 8px 8px;max-height:220px;overflow-y:auto;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none;';
+  inp2.parentElement.style.position='relative';
+  inp2.parentElement.appendChild(dd);
+  function doSearch(){
+    const v=inp2.value.toLowerCase();
+    if(!v||v.length<1){ dd.style.display='none'; return; }
+    // If catalog not loaded yet, show loading
+    if(!hospitais.length){
+      dd.innerHTML='<div style="padding:10px 12px;font-size:11px;color:var(--text3)">⏳ Carregando hospitais...</div>';
+      dd.style.display='block';
+      return;
+    }
+    const matches=hospitais.filter(h=>h.nome?.toLowerCase().includes(v)||h.cidade?.toLowerCase().includes(v)).slice(0,10);
+    if(!matches.length){ dd.style.display='none'; return; }
+    dd.innerHTML=matches.map(h=>`<div style="padding:8px 12px;cursor:pointer;border-bottom:1px solid rgba(37,45,61,.5);font-size:12px;"
+      data-nome="${h.nome.replace(/"/g,'&quot;')}" data-inp="${inputId}"
+      onmousedown="var el=document.getElementById(this.dataset.inp);if(el){el.value=this.dataset.nome;}document.getElementById('hac-'+this.dataset.inp).style.display='none'"
+      onmouseover="this.style.background='var(--s3)'" onmouseout="this.style.background=''">
+      <div style="font-weight:500">${h.nome}</div>
+      <div style="font-size:10px;color:var(--text3)">${h.cidade||''} ${h.contato?'· '+h.contato:''}</div>
+    </div>`).join('');
+    dd.style.display='block';
+  }
+  inp2.addEventListener('input', doSearch);
+  inp2.addEventListener('focus', doSearch);
+  inp2.addEventListener('blur',()=>setTimeout(()=>{ dd.style.display='none'; },250));
+}
+function setupHospAc(inputId, onSelect){
+  const inp=document.getElementById(inputId); if(!inp) return;
+  let dd=document.createElement('div');
+  dd.className='ac-list';
+  dd.style.cssText='position:absolute;top:100%;left:0;right:0;background:var(--s2);border:1px solid var(--accent);border-top:none;border-radius:0 0 6px 6px;max-height:180px;overflow-y:auto;z-index:500;display:none;';
+  inp.parentElement.style.position='relative';
+  inp.parentElement.appendChild(dd);
+  inp.addEventListener('input',()=>{
+    const v=inp.value.toLowerCase();
+    if(!v||!hospitais.length){ dd.style.display='none'; return; }
+    const matches=hospitais.filter(h=>h.nome?.toLowerCase().includes(v)).slice(0,8);
+    if(!matches.length){ dd.style.display='none'; return; }
+    dd.innerHTML=matches.map(h=>`<div class="ac-item" onclick="(${onSelect.toString()})('${h.nome}');this.closest('.ac-list').style.display='none'">${h.nome}<span>${h.cidade||''}</span></div>`).join('');
+    dd.style.display='block';
+  });
+}
+
+// ─── CADASTROS ────────────────────────────────────────────────────────────────
+let cadTab='hospitais';
+function setCadTab(t,el){
+  cadTab=t;
+  document.querySelectorAll('.cad-tab').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('cad-hospitais').style.display=t==='hospitais'?'block':'none';
+  document.getElementById('cad-materiais').style.display=t==='materiais'?'block':'none';
+  document.getElementById('cad-assessores').style.display=t==='assessores'?'block':'none';
+  renderCadastros();
+}
+function renderCadastros(){
+  // Hospitals
+  const hb=document.getElementById('hosp-body');
+  const cadSearch=(document.getElementById('cad-search')?.value||'').toLowerCase();
+  const hospSorted=[...hospitais].filter(h=>!cadSearch||h.nome?.toLowerCase().includes(cadSearch)||h.cidade?.toLowerCase().includes(cadSearch)).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+  if(hb) hb.innerHTML=hospSorted.length?hospSorted.map(h=>`<tr class="cr" onclick="openHospDetail('${h.id}')">
+    <td style="font-weight:600">${h.nome}</td>
+    <td style="color:var(--text2)">${h.cidade||'—'}</td>
+    <td style="color:var(--text2)">${h.contato||'—'}</td>
+    <td style="color:var(--text3);font-size:11px">${h.obs||'—'}</td>
+    <td onclick="event.stopPropagation()" style="white-space:nowrap">
+      ${currentUser?.perfil==='gestor'?`
+        <button class="btn btn-primary btn-xs" onclick="openHospForm('${h.id}')">✏ Editar</button>
+        <button class="btn btn-danger btn-xs" onclick="deleteHosp('${h.id}')">🗑</button>
+      `:'<span style="color:var(--text3);font-size:10px">👁 ver</span>'}
+    </td>
+  </tr>`).join(''):`<tr><td colspan="5"><div class="empty" style="padding:24px"><div class="empty-icon">🏥</div>Nenhum hospital cadastrado</div></td></tr>`;
+  const hc=document.getElementById('hosp-count'); if(hc) hc.textContent=`${hospSorted.length} de ${hospitais.length} hospitais`;
+  // Materials
+  renderAssessores();
+  const mb=document.getElementById('mat-body');
+  const matSorted=[...materiais].filter(m=>!cadSearch||(m.desc||'').toLowerCase().includes(cadSearch)||(m.ref||'').toLowerCase().includes(cadSearch)||(m.fab||'').toLowerCase().includes(cadSearch)).sort((a,b)=>(a.desc||'').localeCompare(b.desc||'','pt-BR'));
+  if(mb) mb.innerHTML=matSorted.length?matSorted.map(m=>`<tr class="cr" onclick="openMatDetail('${m.id}')">
+    <td style="font-family:var(--mono);font-size:11px;color:var(--accent)">${m.ref||'—'}</td>
+    <td style="font-weight:500">${m.desc||'—'}</td>
+    <td style="color:var(--text2)">${m.fab||'—'}</td>
+    <td style="font-family:var(--mono);font-size:11px;color:var(--cyan)">${m.anvisa||'—'}</td>
+    <td><span style="background:var(--s2);padding:1px 6px;border-radius:4px;font-size:10px;font-family:var(--mono)">${m.unidade||'UN'}</span></td>
+    <td class="money m-green">${m.vunit?fm(m.vunit):'—'}</td>
+    <td style="color:var(--text3);font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.obs||'—'}</td>
+    <td onclick="event.stopPropagation()" style="white-space:nowrap">
+      ${currentUser?.perfil==='gestor'?`
+        <button class="btn btn-primary btn-xs" onclick="openMatForm('${m.id}')">✏ Editar</button>
+        <button class="btn btn-danger btn-xs" onclick="deleteMat('${m.id}')">🗑</button>
+      `:'<span style="color:var(--text3);font-size:10px">👁 ver</span>'}
+    </td>
+  </tr>`).join(''):`<tr><td colspan="8"><div class="empty" style="padding:24px"><div class="empty-icon">📦</div>Nenhum material cadastrado</div></td></tr>`;
+  const mc=document.getElementById('mat-count'); if(mc) mc.textContent=`${matSorted.length} de ${materiais.length} materiais`;
+}
+
+// Hospital CRUD
+function openHospForm(id){
+  editHospId=id||null;
+  const h=id?hospitais.find(x=>x.id===id):null;
+  document.getElementById('hosp-form-title').textContent=id?'Editar Hospital':'Novo Hospital';
+  document.getElementById('hf-nome').value=h?.nome||'';
+  document.getElementById('hf-cidade').value=h?.cidade||'';
+  document.getElementById('hf-contato').value=h?.contato||'';
+  document.getElementById('hf-obs').value=h?.obs||'';
+  document.getElementById('hf-err').style.display='none';
+  document.getElementById('hosp-overlay').classList.add('open');
+}
+function closeHospForm(){ document.getElementById('hosp-overlay').classList.remove('open'); }
+async function saveHosp(){
+  const nome=document.getElementById('hf-nome').value.trim();
+  if(!nome){ document.getElementById('hf-err').textContent='Nome obrigatório.'; document.getElementById('hf-err').style.display='block'; return; }
+  const obj={id:editHospId||'hlocal'+Date.now(), nome, cidade:document.getElementById('hf-cidade').value.trim(), contato:document.getElementById('hf-contato').value.trim(), obs:document.getElementById('hf-obs').value.trim()};
+  if(editHospId){ hospitais[hospitais.findIndex(x=>x.id===editHospId)]=obj; }
+  else { hospitais.push(obj); }
+  closeHospForm(); await saveData(); renderCadastros(); showToast('✓ Hospital salvo');
+}
+async function deleteHosp(id){ if(!confirm('Excluir hospital?')) return; hospitais=hospitais.filter(x=>x.id!==id); await saveData(); renderCadastros(); showToast('🗑 Excluído'); }
+
+// Material CRUD
+function openMatForm(id){
+  editMatId=id||null;
+  const m=id?materiais.find(x=>x.id===id):null;
+  document.getElementById('mat-form-title').textContent=id?'Editar Material':'Novo Material';
+  document.getElementById('maf-ref').value=m?.ref||'';
+  document.getElementById('maf-desc').value=m?.desc||'';
+  document.getElementById('maf-fab').value=m?.fab||'';
+  document.getElementById('maf-anvisa').value=m?.anvisa||'';
+  document.getElementById('maf-vunit').value=m?.vunit||'';
+  document.getElementById('maf-obs').value=m?.obs||'';
+  document.getElementById('maf-err').style.display='none';
+  document.getElementById('mat-overlay').classList.add('open');
+}
+function closeMatForm(){ document.getElementById('mat-overlay').classList.remove('open'); }
+async function saveMat(){
+  const ref=document.getElementById('maf-ref').value.trim();
+  const desc=document.getElementById('maf-desc').value.trim();
+  if(!ref&&!desc){ document.getElementById('maf-err').textContent='Referência ou descrição obrigatória.'; document.getElementById('maf-err').style.display='block'; return; }
+  const obj={id:editMatId||'mlocal'+Date.now(), ref, desc, fab:document.getElementById('maf-fab').value.trim(), anvisa:document.getElementById('maf-anvisa').value.trim(), vunit:parseFloat(document.getElementById('maf-vunit').value)||0, obs:document.getElementById('maf-obs').value.trim()};
+  if(editMatId){ materiais[materiais.findIndex(x=>x.id===editMatId)]=obj; }
+  else { materiais.push(obj); }
+  closeMatForm(); await saveData(); renderCadastros(); showToast('✓ Material salvo');
+}
+async function deleteMat(id){ if(!confirm('Excluir material?')) return; materiais=materiais.filter(x=>x.id!==id); await saveData(); renderCadastros(); showToast('🗑 Excluído'); }
+
+// ─── EXPEDIÇÃO ───────────────────────────────────────────────────────────────
+let editExpId=null;
+const EXP_COLOR={Pendente:'var(--text3)',Separado:'var(--accent)',Enviado:'var(--warn)',Entregue:'var(--green)',Devolvido:'var(--purple)'};
+const EXP_ICON={Pendente:'⏳',Separado:'📦',Enviado:'🚚',Entregue:'✅',Devolvido:'↩️'};
+function getExpSt(m){ return m?.expedicao?.status||'Pendente'; }
+
+function renderExp(){
+  const s=(document.getElementById('ef-s')?.value||'').toLowerCase();
+  const st=document.getElementById('ef-status')?.value||'';
+  const tp=document.getElementById('ef-tipo')?.value||'';
+  const h=document.getElementById('ef-hosp')?.value||'';
+  const hospitals=[...new Set(mapaItems.map(m=>m.hospital).filter(Boolean))];
+  const hSel=document.getElementById('ef-hosp');
+  if(hSel){ const hv=hSel.value; hSel.innerHTML='<option value="">Todos hospitais</option>'+hospitals.map(x=>`<option ${x===hv?'selected':''}>${x}</option>`).join(''); }
+  let data=mapaItems.filter(m=>{
+    const expSt=getExpSt(m);
+    const ms=!s||[m.paciente,m.hospital,m.proc,m.id,m.numcot].some(x=>x?.toLowerCase().includes(s));
+    return ms&&(!st||expSt===st)&&(!tp||m.expedicao?.tipo===tp)&&(!h||m.hospital===h);
+  }).sort((a,b)=>{if(!a.datacir&&!b.datacir)return 0;if(!a.datacir)return 1;if(!b.datacir)return -1;return a.datacir.localeCompare(b.datacir);});
+
+  const counts={Pendente:0,Separado:0,Enviado:0,Entregue:0,Devolvido:0};
+  mapaItems.forEach(m=>{ const s=getExpSt(m); if(counts[s]!==undefined) counts[s]++; });
+  document.getElementById('exp-cards').innerHTML=`
+    <div class="card"><div class="card-lbl">⏳ Pendente</div><div class="card-val" style="color:var(--text3)">${counts.Pendente}</div></div>
+    <div class="card c-blue"><div class="card-lbl">📦 Separado</div><div class="card-val">${counts.Separado}</div></div>
+    <div class="card c-warn"><div class="card-lbl">🚚 Enviado</div><div class="card-val">${counts.Enviado}</div></div>
+    <div class="card c-green"><div class="card-lbl">✅ Entregue</div><div class="card-val">${counts.Entregue}</div></div>
+    <div class="card c-purple"><div class="card-lbl">↩️ Devolvido</div><div class="card-val">${counts.Devolvido}</div></div>
+  `;
+  document.getElementById('exp-body').innerHTML=data.length?data.map(m=>{
+    const exp=m.expedicao||{}; const st2=exp.status||'Pendente';
+    const cotVinc=m.numcot?cotacoes.find(x=>x.id===m.numcot):null;
+    return `<tr class="cr" onclick="openExpForm('${m.id}')">
+      <td><span class="id-tag">${m.id}</span></td>
+      <td style="font-family:var(--mono);font-size:10px;color:var(--accent)">${m.numcot||'—'}</td>
+      <td style="font-family:var(--mono);font-size:10px">${fd(m.datacir)}${m.hora?' '+m.hora:''}</td>
+      <td>${m.paciente||'—'}</td><td>${m.hospital||'—'}</td>
+      <td><span style="color:${EXP_COLOR[st2]};font-weight:600">${EXP_ICON[st2]} ${st2}</span></td>
+      <td style="color:var(--text2)">${exp.tipo||'—'}</td>
+      <td style="color:var(--text2)">${exp.resp||'—'}</td>
+      <td style="font-family:var(--mono);font-size:10px">${exp.dataenvio?new Date(exp.dataenvio).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—'}</td>
+      <td style="color:var(--text2)">${exp.recebido||'—'}</td>
+      <td style="color:var(--text2)">${exp.setor||'—'}</td>
+      <td style="font-family:var(--mono);font-size:10px">${exp.dataentrega?new Date(exp.dataentrega).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—'}</td>
+      <td onclick="event.stopPropagation()">${canDo('exp')?`<button class="btn btn-ghost btn-xs" onclick="openExpForm('${m.id}')" >✏</button>`:''}</td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="13"><div class="empty"><div class="empty-icon">🚚</div>Nenhuma cirurgia no mapa</div></td></tr>`;
+  document.getElementById('exp-count').textContent=`${data.length} cirurgias`;
+}
+
+function openExpForm(mapaId){
+  if(!canDo('exp')&&currentUser?.perfil!=='gestor'){ showToast('Somente Logística e Estoque podem editar expedição'); return; }
+  editExpId=mapaId;
+  const m=mapaItems.find(x=>x.id===mapaId); if(!m) return;
+  const exp=m.expedicao||{};
+  const cotVinc=m.numcot?cotacoes.find(x=>x.id===m.numcot):null;
+  document.getElementById('exp-form-title').textContent=`Expedição — ${m.id}`;
+  document.getElementById('exp-cir-info').innerHTML=`
+    <div style="font-size:10px;color:var(--text3);margin-bottom:4px">CIRURGIA</div>
+    <div style="font-size:13px;font-weight:600">${m.paciente||'—'}</div>
+    <div style="font-size:11px;color:var(--text2);margin-top:4px">📅 ${fd(m.datacir)}${m.hora?' '+m.hora:''} · 🏥 ${m.hospital||'—'} · 👨‍⚕️ ${m.medico||'—'}</div>
+    ${cotVinc?`<div style="margin-top:6px;font-size:11px">🔗 <span style="font-family:var(--mono);color:var(--accent)">${cotVinc.id}</span> — ${(cotVinc.itens||[]).length} materiais — <span style="color:var(--green)">${fm((cotVinc.itens||[]).reduce((a,it)=>a+(parseFloat(it.vtotal)||0),0))}</span></div>`:''}
+  `;
+  document.getElementById('expf-status').value=exp.status||'Pendente';
+  document.getElementById('expf-tipo').value=exp.tipo||'';
+  document.getElementById('expf-resp').value=exp.resp||currentUser?.nome||'';
+  document.getElementById('expf-dataenvio').value=exp.dataenvio||'';
+  document.getElementById('expf-recebido').value=exp.recebido||'';
+  document.getElementById('expf-setor').value=exp.setor||'';
+  document.getElementById('expf-dataentrega').value=exp.dataentrega||'';
+  document.getElementById('expf-obs').value=exp.obs||'';
+  document.getElementById('exp-overlay').classList.add('open');
+}
+function closeExpForm(){ document.getElementById('exp-overlay').classList.remove('open'); }
+
+async function saveExp(){
+  const g=id=>document.getElementById(id)?.value||'';
+  const m=mapaItems.find(x=>x.id===editExpId); if(!m) return;
+  const oldSt=m.expedicao?.status||'Pendente';
+  const newSt=g('expf-status');
+  m.expedicao={status:newSt,tipo:g('expf-tipo'),resp:g('expf-resp'),dataenvio:g('expf-dataenvio'),recebido:g('expf-recebido'),setor:g('expf-setor'),dataentrega:g('expf-dataentrega'),obs:g('expf-obs')};
+  if(oldSt!==newSt) addLog('Expedição atualizada',m.id,`${oldSt} → ${newSt}`);
+  closeExpForm(); await saveData();
+  showToast(`✓ Expedição: ${newSt}`); renderExp();
+}
+
+function exportExp(){
+  downloadCSV(toCSV(mapaItems,[
+    {l:'ID',k:'id'},{l:'Cot.',k:'numcot'},{l:'Data Cir.',v:m=>fd(m.datacir)},
+    {l:'Paciente',k:'paciente'},{l:'Hospital',k:'hospital'},
+    {l:'Status',v:m=>m.expedicao?.status||'Pendente'},
+    {l:'Tipo Entrega',v:m=>m.expedicao?.tipo||''},
+    {l:'Entregou',v:m=>m.expedicao?.resp||''},
+    {l:'Dt.Envio',v:m=>m.expedicao?.dataenvio||''},
+    {l:'Recebeu',v:m=>m.expedicao?.recebido||''},
+    {l:'Setor',v:m=>m.expedicao?.setor||''},
+    {l:'Dt.Entrega',v:m=>m.expedicao?.dataentrega||''},
+    {l:'Obs',v:m=>m.expedicao?.obs||''},
+  ]),'expedicao_'+new Date().toISOString().split('T')[0]);
+  showToast('✓ Excel exportado');
+}
+
+// ─── MAPA COMPARTILHAR ───────────────────────────────────────────────────────
+function openMapaCompartilhar(){
+  const today=new Date().toISOString().split('T')[0];
+  const s=(document.getElementById('mf-s')?.value||'').toLowerCase();
+  const st=document.getElementById('mf-status')?.value||'';
+  let data=[...mapaItems].filter(m=>{
+    const ms=!s||[m.paciente,m.hospital,m.proc].some(x=>x?.toLowerCase().includes(s));
+    return ms&&(!st||m.status===st);
+  }).sort((a,b)=>{if(!a.datacir&&!b.datacir)return 0;if(!a.datacir)return 1;if(!b.datacir)return -1;return a.datacir.localeCompare(b.datacir);});
+
+  const rows=data.map(m=>{
+    const cotVinc=m.numcot?cotacoes.find(x=>x.id===m.numcot):null;
+    // Itens: preferir itens_mapa (editados no mapa), senão itens da cotação
+    const itensAutorizados=(m.itens_mapa&&m.itens_mapa.length>0)?m.itens_mapa:(cotVinc?.itens||[]);
+    const cls=getMapaClass(m);
+    const bgColor={hoje:'#1a2a3a',adiada:'#2a1f0a',cancelada:'#2a0a10',realizada:'#1a1030','ag-fat':'#2a2000',faturada:'#0a2010',amanha:'#111827'}[cls]||'#111827';
+    const borderColor={hoje:'#4f9eff',adiada:'#f5a623',cancelada:'#ff4f6d',realizada:'#9b71f5','ag-fat':'#f5a623',faturada:'#2dd4a0',amanha:'#252d3d'}[cls]||'#252d3d';
+    // Materiais autorizados
+    const matAutHTML=itensAutorizados.length?itensAutorizados.map(it=>{
+      const qtdAut=it.qtd||1;
+      const qtdEnv=it.qtd_env||0;
+      const cor=qtdEnv>=qtdAut?'#2dd4a0':qtdEnv>0?'#f5a623':'#8896aa';
+      return `<div style="font-size:10px;color:${cor};line-height:1.5"><b>${it.ref||''}</b>${it.desc?' — '+it.desc:''} <span style="color:#555">(Aut:${qtdAut}${qtdEnv?' Env:'+qtdEnv:''})</span></div>`;
+    }).join(''):'<span style="color:#555;font-size:10px">—</span>';
+    const obsHTML=m.obs?`<div style="font-size:10px;color:#f5a623;margin-top:4px">⚠ ${m.obs}</div>`:'';
+    return `<tr style="background:${bgColor};border-left:3px solid ${borderColor}">
+      <td style="padding:8px;font-family:monospace;font-size:11px;white-space:nowrap;color:#8896aa">${fd(m.datacir)}${m.hora?' '+m.hora:''}</td>
+      <td style="padding:8px;font-weight:600;color:#e8edf5">${m.paciente||'—'}</td>
+      <td style="padding:8px;color:#8896aa">${m.medico||'—'}</td>
+      <td style="padding:8px;color:#8896aa">${m.assessora||'—'}</td>
+      <td style="padding:8px;color:#8896aa">${m.hospital||'—'}</td>
+      <td style="padding:8px">${matAutHTML}${obsHTML}</td>
+      <td style="padding:8px">${getStatusBadge(m)}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('comp-body').innerHTML=`
+    <div style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:12px;color:var(--text2)">Data: ${new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})} · ${data.length} cirurgias</div>
+      <div style="font-size:11px;color:var(--text3)">⚠ Versão sem valores financeiros</div>
+    </div>
+    <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-family:'DM Sans',sans-serif;font-size:12px">
+      <thead><tr style="background:#1e2533">
+        <th style="padding:8px;text-align:left;font-size:10px;color:#4a5568;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap">Data/Hora</th>
+        <th style="padding:8px;text-align:left;font-size:10px;color:#4a5568;text-transform:uppercase;letter-spacing:.8px">Paciente</th>
+        <th style="padding:8px;text-align:left;font-size:10px;color:#4a5568;text-transform:uppercase;letter-spacing:.8px">Médico</th>
+        <th style="padding:8px;text-align:left;font-size:10px;color:#4a5568;text-transform:uppercase;letter-spacing:.8px">Assessora</th>
+        <th style="padding:8px;text-align:left;font-size:10px;color:#4a5568;text-transform:uppercase;letter-spacing:.8px">Hospital</th>
+        <th style="padding:8px;text-align:left;font-size:10px;color:#4a5568;text-transform:uppercase;letter-spacing:.8px">Materiais / Obs</th>
+        <th style="padding:8px;text-align:left;font-size:10px;color:#4a5568;text-transform:uppercase;letter-spacing:.8px">Status</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    </div>
+    <div style="margin-top:12px;font-size:10px;color:var(--text3);text-align:center">EndoCenter · Gestão Cirúrgica · ${new Date().toLocaleString('pt-BR')}</div>
+  `;
+  document.getElementById('comp-overlay').classList.add('open');
+}
+function closeMapaCompartilhar(){ document.getElementById('comp-overlay').classList.remove('open'); }
+
+// ─── ASSESSORES CRUD ──────────────────────────────────────────────────────────
+let editAssId=null;
+function renderAssessores(){
+  const b=document.getElementById('ass-body'); if(!b) return;
+  b.innerHTML=assessores.length?assessores.map(a=>`<tr>
+    <td><b>${a.nome}</b></td>
+    <td style="color:var(--text2)">${a.tel||'—'}</td>
+    <td style="color:var(--text2)">${a.obs||'—'}</td>
+    <td><button class="btn btn-ghost btn-xs" onclick="openAssForm('${a.id}')">✏</button> <button class="btn btn-danger btn-xs" onclick="deleteAss('${a.id}')">🗑</button></td>
+  </tr>`).join(''):`<tr><td colspan="4"><div class="empty" style="padding:24px"><div class="empty-icon">👩</div>Nenhuma assessora cadastrada</div></td></tr>`;
+}
+function openAssForm(id){
+  editAssId=id||null;
+  const a=id?assessores.find(x=>x.id===id):null;
+  document.getElementById('ass-form-title').textContent=id?'Editar Assessora':'Nova Assessora';
+  document.getElementById('af-nome').value=a?.nome||'';
+  document.getElementById('af-tel').value=a?.tel||'';
+  document.getElementById('af-obs').value=a?.obs||'';
+  document.getElementById('af-err').style.display='none';
+  document.getElementById('ass-overlay').classList.add('open');
+}
+function closeAssForm(){ document.getElementById('ass-overlay').classList.remove('open'); }
+async function saveAss(){
+  const nome=document.getElementById('af-nome').value.trim();
+  if(!nome){ document.getElementById('af-err').textContent='Nome obrigatório.'; document.getElementById('af-err').style.display='block'; return; }
+  const obj={id:editAssId||'a'+Date.now(), nome, tel:document.getElementById('af-tel').value.trim(), obs:document.getElementById('af-obs').value.trim()};
+  if(editAssId){ assessores[assessores.findIndex(x=>x.id===editAssId)]=obj; }
+  else { assessores.push(obj); }
+  closeAssForm(); await saveData(); renderAssessores(); showToast('✓ Assessora salva');
+}
+async function deleteAss(id){ if(!confirm('Excluir assessora?')) return; assessores=assessores.filter(x=>x.id!==id); await saveData(); renderAssessores(); showToast('🗑 Excluída'); }
+
+// ─── VENDEDOR FILTER ──────────────────────────────────────────────────────────
+function getVendedorFilter(){
+  if(currentUser?.perfil==='vendedor') return currentUser.nome;
+  return null;
+}
+
+// ─── HOSPITAL DETAIL ─────────────────────────────────────────────────────────
+function openHospDetail(id){
+  const h=hospitais.find(x=>x.id===id); if(!h) return;
+  // Count how many cotações use this hospital
+  const cots=cotacoes.filter(c=>c.hospital===h.nome);
+  const mapaCount=mapaItems.filter(m=>m.hospital===h.nome).length;
+  const vlTotal=cots.reduce((a,c)=>a+(parseFloat(c.vlap)||parseFloat(c.vlcot)||0),0);
+  document.getElementById('detail-panel').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
+      <div>
+        <div style="font-size:10px;color:var(--text3);margin-bottom:4px">HOSPITAL</div>
+        <div style="font-size:18px;font-weight:700">${h.nome}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:4px">📍 ${h.cidade||'—'}</div>
+      </div>
+      <button class="xbtn" onclick="closeDetail()">×</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+      <div class="card c-blue"><div class="card-lbl">Cotações</div><div class="card-val">${cots.length}</div></div>
+      <div class="card c-cyan"><div class="card-lbl">Cirurgias</div><div class="card-val">${mapaCount}</div></div>
+      <div class="card c-green" style="min-width:0"><div class="card-lbl">Volume</div><div class="card-val" style="font-size:15px">${fm(vlTotal)}</div></div>
+    </div>
+    <div class="df"><span class="df-lbl">Contato</span><span class="df-val">${h.contato||'—'}</span></div>
+    <div class="df"><span class="df-lbl">Cidade</span><span class="df-val">${h.cidade||'—'}</span></div>
+    ${h.obs?`<div class="df"><span class="df-lbl">Observação</span><span class="df-val">${h.obs}</span></div>`:''}
+    ${cots.length>0?`<div class="section-box" style="margin-top:14px">
+      <div class="section-box-title">Últimas cotações</div>
+      ${cots.slice(0,5).map(c=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:11px">
+        <span><span class="id-tag">${c.id}</span> ${c.paciente||'—'}</span>
+        <span class="chip ${STAGE_CLASS[c.stage]}">${STAGE_LABEL[c.stage]}</span>
+      </div>`).join('')}
+    </div>`:''}
+    <div style="display:flex;gap:8px;margin-top:16px">
+      ${currentUser?.perfil==='gestor'?`<button class="btn btn-primary btn-sm" onclick="closeDetail();openHospForm('${h.id}')">✏ Editar</button>`:''}
+      ${currentUser?.perfil==='gestor'?`<button class="btn btn-danger btn-sm" onclick="deleteHosp('${h.id}')">🗑</button>`:''}
+    </div>
+  `;
+  document.getElementById('detail-overlay').classList.add('open');
+}
+
+// ─── MATERIAL DETAIL ─────────────────────────────────────────────────────────
+function openMatDetail(id){
+  const m=materiais.find(x=>x.id===id); if(!m) return;
+  // Count usage
+  let usageCount=0;
+  cotacoes.forEach(c=>{ if(c.itens) c.itens.forEach(it=>{ if(it.ref===m.ref||it.desc===m.desc) usageCount++; }); });
+  document.getElementById('detail-panel').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
+      <div>
+        <div style="font-size:10px;color:var(--text3);margin-bottom:4px">MATERIAL / PRODUTO</div>
+        <div style="font-family:var(--mono);font-size:12px;color:var(--accent);margin-bottom:4px">${m.ref||'—'}</div>
+        <div style="font-size:16px;font-weight:700;line-height:1.3">${m.desc||'—'}</div>
+      </div>
+      <button class="xbtn" onclick="closeDetail()">×</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+      <div class="card c-warn"><div class="card-lbl">Vl. Unitário</div><div class="card-val" style="font-size:17px">${m.vunit?fm(m.vunit):'—'}</div></div>
+      <div class="card c-cyan"><div class="card-lbl">Usado em</div><div class="card-val">${usageCount}</div><div class="card-sub">cotações</div></div>
+    </div>
+    <div class="df"><span class="df-lbl">Fabricante</span><span class="df-val">${m.fab||'—'}</span></div>
+    <div class="df"><span class="df-lbl">Reg. ANVISA</span><span class="df-val" style="font-family:var(--mono);color:var(--cyan)">${m.anvisa||'—'}</span></div>
+    <div class="df"><span class="df-lbl">Unidade</span><span class="df-val"><span style="background:var(--s2);padding:2px 8px;border-radius:4px;font-family:var(--mono);font-size:11px">${m.unidade||'UN'}</span></span></div>
+    ${m.obs?`<div class="df"><span class="df-lbl">Categoria</span><span class="df-val" style="color:var(--text2)">${m.obs}</span></div>`:''}
+    <div style="display:flex;gap:8px;margin-top:16px">
+      ${currentUser?.perfil==='gestor'?`<button class="btn btn-primary btn-sm" onclick="closeDetail();openMatForm('${m.id}')">✏ Editar</button>`:''}
+      ${currentUser?.perfil==='gestor'?`<button class="btn btn-danger btn-sm" onclick="deleteMat('${m.id}')">🗑</button>`:''}
+    </div>
+  `;
+  document.getElementById('detail-overlay').classList.add('open');
+}
+
+// ─── RELATÓRIOS ──────────────────────────────────────────────────────────────
+function filtrarPorPeriodo(data){
+  const p=document.getElementById('rel-periodo')?.value||'todos';
+  if(p==='todos') return data;
+  const now=new Date();
+  const anoAtual=now.getFullYear();
+  const mesAtual=now.getMonth();
+  return data.filter(c=>{
+    const d=new Date(c.datacot||c.dataenvio);
+    if(isNaN(d)) return false;
+    if(p==='mes') return d.getFullYear()===anoAtual&&d.getMonth()===mesAtual;
+    if(p==='trimestre'){
+      const tri=Math.floor(mesAtual/3);
+      return d.getFullYear()===anoAtual&&Math.floor(d.getMonth()/3)===tri;
+    }
+    if(p==='ano') return d.getFullYear()===anoAtual;
+    return true;
+  });
+}
+
+function barChart(items, valueKey, labelKey, colorFn){
+  if(!items.length) return '<div style="color:var(--text3);font-size:12px;padding:12px 0">Sem dados</div>';
+  const max=Math.max(...items.map(i=>i[valueKey]||0));
+  return items.map(it=>`
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">
+        <span style="color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:65%">${it[labelKey]||'—'}</span>
+        <span style="font-family:var(--mono);color:${colorFn?colorFn(it):'var(--accent)'}">${typeof it[valueKey]==='number'&&it[valueKey]>100?fm(it[valueKey]):it[valueKey]}</span>
+      </div>
+      <div style="background:var(--s3);border-radius:4px;height:6px;overflow:hidden">
+        <div style="background:${colorFn?colorFn(it):'var(--accent)'};height:100%;width:${max>0?Math.round((it[valueKey]/max)*100):0}%;border-radius:4px;transition:width .3s"></div>
+      </div>
+    </div>`).join('');
+}
+
+function renderRelatorios(){
+  const data=filtrarPorPeriodo(cotacoes);
+  if(!data.length){
+    ['rel-hospitais','rel-convenios','rel-aprovacao','rel-produtos','rel-faturamento','rel-vendedores','rel-valores','rel-semresp','rel-tempo'].forEach(id=>{
+      const el=document.getElementById(id); if(el) el.innerHTML='<div style="color:var(--text3);font-size:12px;padding:12px 0">Sem dados no período</div>';
+    });
+    return;
+  }
+
+  // ── Cards resumo ──
+  const totalCot=data.length;
+  const autorizadas=data.filter(c=>['autorizado','faturado','pago'].includes(c.stage)).length;
+  const negadas=data.filter(c=>c.stage==='negado').length;
+  const taxaAp=totalCot>0?Math.round((autorizadas/totalCot)*100):0;
+  const vlCotTotal=data.reduce((a,c)=>a+(parseFloat(c.vlcot)||0),0);
+  const vlApTotal=data.reduce((a,c)=>a+(parseFloat(c.vlap)||0),0);
+  const semResp=data.filter(c=>['cotacao','aprovacao'].includes(c.stage)&&daysBetween(c.dataenvio||c.datacot)>(params.bad||5)).length;
+  document.getElementById('rel-cards').innerHTML=`
+    <div class="card c-blue"><div class="card-lbl">Total cotações</div><div class="card-val">${totalCot}</div></div>
+    <div class="card c-green"><div class="card-lbl">Autorizadas</div><div class="card-val">${autorizadas}</div><div class="card-sub">Taxa: ${taxaAp}%</div></div>
+    <div class="card c-red"><div class="card-lbl">Negadas</div><div class="card-val">${negadas}</div></div>
+    <div class="card c-warn"><div class="card-lbl">Sem resposta</div><div class="card-val">${semResp}</div></div>
+    <div class="card c-warn" style="min-width:160px"><div class="card-lbl">Total cotado</div><div class="card-val" style="font-size:17px">${fm(vlCotTotal)}</div></div>
+    <div class="card c-green" style="min-width:160px"><div class="card-lbl">Total aprovado</div><div class="card-val" style="font-size:17px">${fm(vlApTotal)}</div></div>
+  `;
+
+  // ── Hospitais mais cotados ──
+  const hospMap={};
+  data.forEach(c=>{ if(c.hospital){ hospMap[c.hospital]=(hospMap[c.hospital]||0)+1; } });
+  const hospList=Object.entries(hospMap).map(([h,n])=>({label:h,value:n})).sort((a,b)=>b.value-a.value).slice(0,8);
+  document.getElementById('rel-hospitais').innerHTML=barChart(hospList,'value','label');
+
+  // ── Convênios mais cotados ──
+  const convMap={};
+  data.forEach(c=>{ if(c.convenio){ convMap[c.convenio]=(convMap[c.convenio]||0)+1; } });
+  const convList=Object.entries(convMap).map(([h,n])=>({label:h,value:n})).sort((a,b)=>b.value-a.value).slice(0,8);
+  document.getElementById('rel-convenios').innerHTML=barChart(convList,'value','label',()=>'var(--purple)');
+
+  // ── Taxa aprovação por plano ──
+  const apMap={};
+  data.forEach(c=>{
+    if(!c.convenio) return;
+    if(!apMap[c.convenio]) apMap[c.convenio]={total:0,ap:0};
+    apMap[c.convenio].total++;
+    if(['autorizado','faturado','pago'].includes(c.stage)) apMap[c.convenio].ap++;
+  });
+  const apList=Object.entries(apMap).filter(([_,v])=>v.total>=2).map(([conv,v])=>({
+    label:conv, value:Math.round((v.ap/v.total)*100), total:v.total
+  })).sort((a,b)=>b.value-a.value).slice(0,8);
+  document.getElementById('rel-aprovacao').innerHTML=apList.length?apList.map(it=>`
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">
+        <span style="color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%">${it.label}</span>
+        <span style="font-family:var(--mono);color:${it.value>=70?'var(--green)':it.value>=40?'var(--warn)':'var(--danger)'}">${it.value}% <span style="color:var(--text3)">(${it.total} cot.)</span></span>
+      </div>
+      <div style="background:var(--s3);border-radius:4px;height:6px">
+        <div style="background:${it.value>=70?'var(--green)':it.value>=40?'var(--warn)':'var(--danger)'};height:100%;width:${it.value}%;border-radius:4px"></div>
+      </div>
+    </div>`).join(''):'<div style="color:var(--text3);font-size:12px">Precisa de pelo menos 2 cotações por plano</div>';
+
+  // ── Produtos mais cotados ──
+  const prodMap={};
+  data.forEach(c=>{ (c.itens||[]).forEach(it=>{ if(it.desc){ prodMap[it.desc]=(prodMap[it.desc]||0)+1; } }); });
+  const prodList=Object.entries(prodMap).map(([d,n])=>({label:d,value:n})).sort((a,b)=>b.value-a.value).slice(0,8);
+  document.getElementById('rel-produtos').innerHTML=barChart(prodList,'value','label',()=>'var(--cyan)');
+
+  // ── Faturamento mensal ──
+  const fatMap={};
+  data.filter(c=>['faturado','pago'].includes(c.stage)&&c.datafat).forEach(c=>{
+    const mes=c.datafat.substring(0,7);
+    if(!fatMap[mes]) fatMap[mes]={label:mes,value:0};
+    fatMap[mes].value+=parseFloat(c.vlap)||0;
+  });
+  const fatList=Object.entries(fatMap).map(([_,v])=>v).sort((a,b)=>a.label.localeCompare(b.label)).slice(-12);
+  document.getElementById('rel-faturamento').innerHTML=fatList.length?barChart(fatList,'value','label',()=>'var(--green)'):'<div style="color:var(--text3);font-size:12px">Nenhum faturamento registrado</div>';
+
+  // ── Performance vendedor ──
+  const vendMap={};
+  data.forEach(c=>{
+    const v=c.vendedor||c.resp||'Sem vendedor';
+    if(!vendMap[v]) vendMap[v]={label:v,value:0,ap:0,vlap:0};
+    vendMap[v].value++;
+    if(['autorizado','faturado','pago'].includes(c.stage)){ vendMap[v].ap++; vendMap[v].vlap+=parseFloat(c.vlap)||0; }
+  });
+  const vendList=Object.entries(vendMap).map(([_,v])=>v).sort((a,b)=>b.vlap-a.vlap).slice(0,8);
+  document.getElementById('rel-vendedores').innerHTML=vendList.length?vendList.map(v=>`
+    <div style="margin-bottom:10px;padding:8px;background:var(--s2);border-radius:6px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
+        <span style="font-weight:600;color:var(--text)">${v.label}</span>
+        <span style="font-family:var(--mono);color:var(--green)">${fm(v.vlap)}</span>
+      </div>
+      <div style="font-size:10px;color:var(--text3)">${v.value} cotações · ${v.ap} aprovadas · taxa ${v.value>0?Math.round((v.ap/v.value)*100):0}%</div>
+    </div>`).join(''):'<div style="color:var(--text3);font-size:12px">Sem dados</div>';
+
+  // ── Cotado vs Aprovado ──
+  const difList=data.filter(c=>c.vlcot&&c.vlap&&parseFloat(c.vlap)>0).map(c=>({
+    label:c.id+' '+c.paciente, cotado:parseFloat(c.vlcot)||0, aprovado:parseFloat(c.vlap)||0,
+    dif:((parseFloat(c.vlap)-parseFloat(c.vlcot))/parseFloat(c.vlcot)*100).toFixed(1)
+  })).sort((a,b)=>b.aprovado-a.aprovado).slice(0,8);
+  const vlDifTotal=vlApTotal-vlCotTotal;
+  document.getElementById('rel-valores').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+      <div style="text-align:center;padding:8px;background:var(--s2);border-radius:6px">
+        <div style="font-size:9px;color:var(--text3);margin-bottom:2px">COTADO</div>
+        <div style="font-family:var(--mono);font-size:13px;color:var(--warn)">${fm(vlCotTotal)}</div>
+      </div>
+      <div style="text-align:center;padding:8px;background:var(--s2);border-radius:6px">
+        <div style="font-size:9px;color:var(--text3);margin-bottom:2px">APROVADO</div>
+        <div style="font-family:var(--mono);font-size:13px;color:var(--green)">${fm(vlApTotal)}</div>
+      </div>
+      <div style="text-align:center;padding:8px;background:var(--s2);border-radius:6px">
+        <div style="font-size:9px;color:var(--text3);margin-bottom:2px">DIFERENÇA</div>
+        <div style="font-family:var(--mono);font-size:13px;color:${vlDifTotal>=0?'var(--green)':'var(--danger)'}">${fm(vlDifTotal)}</div>
+      </div>
+    </div>`;
+
+  // ── Sem resposta ──
+  const semRespList=data.filter(c=>['cotacao','aprovacao'].includes(c.stage)).map(c=>({
+    ...c, dias:daysBetween(c.dataenvio||c.datacot)
+  })).sort((a,b)=>b.dias-a.dias).slice(0,10);
+  document.getElementById('rel-semresp').innerHTML=semRespList.length?`
+    <div class="tw" style="max-height:220px;overflow-y:auto">
+    <table><thead><tr><th>ID</th><th>Paciente</th><th>Plano</th><th>Dias</th></tr></thead>
+    <tbody>${semRespList.map(c=>`<tr class="cr" onclick="openCotDetail('${c.id}')">
+      <td><span class="id-tag">${c.id}</span></td>
+      <td style="font-size:11px">${c.paciente||'—'}</td>
+      <td style="font-size:11px;color:var(--text2)">${c.convenio||'—'}</td>
+      <td><span class="timer ${c.dias>=(params.bad||5)?'t-bad':c.dias>=(params.warn||3)?'t-warn':'t-ok'}">${c.dias}d</span></td>
+    </tr>`).join('')}</tbody></table></div>`
+  :'<div style="color:var(--green);font-size:12px">✓ Nenhuma cotação sem resposta</div>';
+
+  // ── Tempo médio por plano ──
+  const tempoMap={};
+  data.filter(c=>c.convenio&&c.dataenvio&&c.dataresp).forEach(c=>{
+    const dias=daysBetween(c.dataenvio,c.dataresp);
+    if(dias===null) return;
+    if(!tempoMap[c.convenio]) tempoMap[c.convenio]={total:0,count:0};
+    tempoMap[c.convenio].total+=dias;
+    tempoMap[c.convenio].count++;
+  });
+  const tempoList=Object.entries(tempoMap).filter(([_,v])=>v.count>0).map(([conv,v])=>({
+    label:conv, value:Math.round(v.total/v.count), count:v.count
+  })).sort((a,b)=>b.value-a.value).slice(0,10);
+  document.getElementById('rel-tempo').innerHTML=tempoList.length?barChart(tempoList,'value','label',it=>it.value>=(params.bad||5)?'var(--danger)':it.value>=(params.warn||3)?'var(--warn)':'var(--green)'):'<div style="color:var(--text3);font-size:12px">Sem dados de resposta registrados</div>';
+}
+
+function exportRelatorios(){
+  const data=filtrarPorPeriodo(cotacoes);
+  // Export summary
+  const rows=[
+    ['Relatório EndoCenter — '+new Date().toLocaleDateString('pt-BR'),'','','',''],
+    ['','','','',''],
+    ['RESUMO','','','',''],
+    ['Total cotações',data.length,'','',''],
+    ['Autorizadas',data.filter(c=>['autorizado','faturado','pago'].includes(c.stage)).length,'','',''],
+    ['Negadas',data.filter(c=>c.stage==='negado').length,'','',''],
+    ['Total cotado',data.reduce((a,c)=>a+(parseFloat(c.vlcot)||0),0).toFixed(2),'','',''],
+    ['Total aprovado',data.reduce((a,c)=>a+(parseFloat(c.vlap)||0),0).toFixed(2),'','',''],
+    ['','','','',''],
+    ['HOSPITAIS MAIS COTADOS','Cotações','','',''],
+  ];
+  const hospMap={};
+  data.forEach(c=>{ if(c.hospital) hospMap[c.hospital]=(hospMap[c.hospital]||0)+1; });
+  Object.entries(hospMap).sort((a,b)=>b[1]-a[1]).slice(0,20).forEach(([h,n])=>rows.push([h,n,'','','']));
+  rows.push(['','','','',''],['CONVÊNIOS MAIS COTADOS','Cotações','','','']);
+  const convMap={};
+  data.forEach(c=>{ if(c.convenio) convMap[c.convenio]=(convMap[c.convenio]||0)+1; });
+  Object.entries(convMap).sort((a,b)=>b[1]-a[1]).slice(0,20).forEach(([h,n])=>rows.push([h,n,'','','']));
+  rows.push(['','','','',''],['PERFORMANCE VENDEDORES','Cotações','Aprovadas','Taxa%','Vl.Aprovado']);
+  const vendMap={};
+  data.forEach(c=>{
+    const v=c.vendedor||c.resp||'Sem vendedor';
+    if(!vendMap[v]) vendMap[v]={value:0,ap:0,vlap:0};
+    vendMap[v].value++; if(['autorizado','faturado','pago'].includes(c.stage)){vendMap[v].ap++;vendMap[v].vlap+=parseFloat(c.vlap)||0;}
+  });
+  Object.entries(vendMap).sort((a,b)=>b[1].vlap-a[1].vlap).forEach(([v,d])=>rows.push([v,d.value,d.ap,d.value>0?Math.round((d.ap/d.value)*100):0,d.vlap.toFixed(2)]));
+  const csv='﻿'+rows.map(r=>r.join(';')).join(String.fromCharCode(10));
+  const b=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const u=URL.createObjectURL(b);
+  const a=document.createElement('a'); a.href=u; a.download='relatorio_endocenter_'+new Date().toISOString().split('T')[0]+'.csv'; a.click();
+  URL.revokeObjectURL(u);
+  showToast('✓ Relatório exportado');
+}
+
+// ─── MAPA ITEMS ──────────────────────────────────────────────────────────────
+function addMapaItem(){
+  const tbody=document.getElementById('mapa-items-tbody'); if(!tbody) return;
+  const i=tbody.querySelectorAll('tr').length;
+  const ST='background:var(--s3);border:1px solid var(--border);color:var(--text);padding:3px 6px;border-radius:4px;font-size:11px;font-family:var(--mono);width:100%;outline:none;';
+  const tr=document.createElement('tr');
+  tr.innerHTML=`
+    <td style="position:relative"><input type="text" id="mi-ref-${i}" style="${ST}" placeholder="Ref. ou descrição" oninput="acMateriaisMapa(${i})" onblur="setTimeout(()=>hideMapaAc(${i}),200)"></td>
+    <td><input type="text" id="mi-desc-${i}" style="${ST}" placeholder="Descrição"></td>
+    <td><input type="text" id="mi-nrua-${i}" style="${ST}" placeholder="Ex: kit esfera"></td>
+    <td><input type="text" id="mi-fab-${i}" style="${ST}" placeholder="Fabricante"></td>
+    <td><input type="number" id="mi-qtd-${i}" value="1" min="0" step="1" oninput="calcMapaItems()" style="${ST}text-align:right;width:55px"></td>
+    <td><input type="number" id="mi-vunit-${i}" step="0.01" oninput="calcMapaItems()" style="${ST}text-align:right"></td>
+    <td><input type="number" id="mi-vtotal-${i}" readonly style="${ST}text-align:right;color:var(--green);font-weight:600"></td>
+    <td><input type="text" id="mi-obs-${i}" style="${ST}" placeholder="Obs."></td>
+    <td><button type="button" class="btn btn-danger btn-xs" onclick="this.closest('tr').remove();calcMapaItems()">✕</button></td>`;
+  tbody.appendChild(tr);
+  const inp=tr.querySelector('input'); if(inp) inp.focus();
+}
+function acMateriaisMapa(i){
+  const activeEl=document.activeElement;
+  const refEl=document.getElementById('mi-ref-'+i);
+  const descEl=document.getElementById('mi-desc-'+i);
+  const val=(activeEl?.id===('mi-ref-'+i)?refEl?.value:activeEl?.id===('mi-desc-'+i)?descEl?.value:(refEl?.value||'')).toLowerCase();
+  if(!val||val.length<2) return;
+  const matches=materiais.filter(m=>
+    m.ref?.toLowerCase().includes(val)||
+    m.desc?.toLowerCase().includes(val)||
+    m.fab?.toLowerCase().includes(val)
+  ).slice(0,10);
+  if(!matches.length) return;
+  let dd=document.getElementById('mac-dd-'+i);
+  if(!dd){
+    dd=document.createElement('div');
+    dd.id='mac-dd-'+i;
+    dd.className='ac-list open';
+    dd.style.cssText='position:absolute;top:100%;left:0;right:0;background:var(--s2);border:1px solid var(--accent);border-top:none;border-radius:0 0 8px 8px;max-height:200px;overflow-y:auto;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.4);';
+    const wrap=document.activeElement?.parentElement;
+    if(wrap){ wrap.style.position='relative'; wrap.appendChild(dd); }
+  }
+  dd.innerHTML=matches.map(m=>`<div class="ac-item" onmousedown="fillMapaMat(${i},'${m.id}')">
+    <b>${m.ref||'—'}</b> — ${m.desc} <span>${m.fab||''}</span>
+    <span style="float:right;color:var(--green)">${m.vunit?fm(m.vunit):''}</span>
+  </div>`).join('');
+  dd.style.display='block';
+}
+function fillMapaMat(i,matId){
+  const m=materiais.find(x=>x.id===matId); if(!m) return;
+  const s=(id,v)=>{ const el=document.getElementById(id); if(el) el.value=v||''; };
+  s('mi-ref-'+i,m.ref); s('mi-desc-'+i,m.desc); s('mi-fab-'+i,m.fab); s('mi-vunit-'+i,m.vunit||'');
+  const q=document.getElementById('mi-qtd-'+i); if(q&&!q.value) q.value=1;
+  calcMapaItems();
+  const dd=document.getElementById('mac-dd-'+i); if(dd) dd.style.display='none';
+}
+document.addEventListener('click',e=>{
+  document.querySelectorAll('[id^="mac-dd-"]').forEach(dd=>{ if(!dd.contains(e.target)) dd.style.display='none'; });
+});
+
+function calcMapaItems(){
+  const rows=document.querySelectorAll('#mapa-items-tbody tr'); let grand=0;
+  rows.forEach((_,i)=>{
+    const qtd=parseFloat(document.getElementById('mi-qtd-'+i)?.value)||0;
+    const vunit=parseFloat(document.getElementById('mi-vunit-'+i)?.value)||0;
+    const tot=qtd*vunit;
+    const vtEl=document.getElementById('mi-vtotal-'+i); if(vtEl) vtEl.value=tot>0?tot.toFixed(2):'';
+    grand+=tot;
+  });
+  const gtEl=document.getElementById('mapa-grand-total');
+  if(gtEl) gtEl.textContent='R$ '+grand.toLocaleString('pt-BR',{minimumFractionDigits:2});
+}
+function collectMapaItems(){
+  const rows=document.querySelectorAll('#mapa-items-tbody tr'); const items=[];
+  rows.forEach((_,i)=>{
+    const ref=document.getElementById('mi-ref-'+i)?.value||'';
+    const desc=document.getElementById('mi-desc-'+i)?.value||'';
+    const fab=document.getElementById('mi-fab-'+i)?.value||'';
+    const qtd=parseFloat(document.getElementById('mi-qtd-'+i)?.value)||0;
+    const vunit=parseFloat(document.getElementById('mi-vunit-'+i)?.value)||0;
+    const vtotal=parseFloat(document.getElementById('mi-vtotal-'+i)?.value)||0;
+    const nrua=document.getElementById('mi-nrua-'+i)?.value||'';
+    const obs=document.getElementById('mi-obs-'+i)?.value||'';
+    if(desc||ref) items.push({ref,desc,nome_rua:nrua,fab,qtd_env:qtd,qtd,vunit,vtotal,obs});
+  });
+  return items;
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+function init(){
+  cfg=getConfig();
+  if(!cfg){ document.getElementById('cfg-screen').classList.add('open'); document.getElementById('login-screen').style.display='none'; return; }
+  document.getElementById('login-screen').style.display='flex';
+  loadData();
+  setInterval(()=>{ if(currentUser) loadData(true); },60000);
+}
+init();
+</script>
+</body>
+</html>
