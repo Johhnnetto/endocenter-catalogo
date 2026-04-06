@@ -3133,6 +3133,11 @@ function init(){
   setInterval(()=>{ if(currentUser) loadData(true); },60000);
 }
 init();
+
+function hideMapaAc(i){
+  const w=document.getElementById('mi-ref-'+i);
+  if(w){const p=w.closest('.ac-wrap');if(p){const l=p.querySelector('.ac-list');if(l)l.classList.remove('open');}}
+}
 </script>
 </body>
 </html>
