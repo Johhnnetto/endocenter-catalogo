@@ -3187,6 +3187,59 @@ openMapaDetail = async function(id) {
   dp.insertBefore(div, btns);
 };
 
+
+// Override renderMapa — adiciona colunas Materiais e Valor
+const _origRenderMapa = renderMapa;
+window.renderMapa = async function(filter) {
+  await _origRenderMapa(filter);
+  await new Promise(r => setTimeout(r, 100));
+  const tabela = document.querySelector('#mapa-list table, table');
+  if(!tabela || tabela.querySelector('.th-mat')) return;
+  // Adicionar headers
+  const thead = tabela.querySelector('thead tr');
+  if(thead) {
+    const thStatus = [...thead.querySelectorAll('th')].find(th => th.innerText.trim()==='STATUS' || th.innerText.trim()==='Status');
+    if(thStatus) {
+      const thM = document.createElement('th');
+      thM.className = 'th-mat';
+      thM.textContent = 'Materiais';
+      thM.style.cssText = 'font-size:11px;';
+      const thV = document.createElement('th');
+      thV.className = 'th-val';
+      thV.textContent = 'Valor';
+      thV.style.cssText = 'font-size:11px;text-align:right;';
+      thead.insertBefore(thV, thStatus);
+      thead.insertBefore(thM, thV);
+    }
+  }
+  // Buscar dados do mapa
+  const dados = await apiRead();
+  const mapaItems = dados.mapaItems || [];
+  const rows = tabela.querySelectorAll('tbody tr');
+  rows.forEach(tr => {
+    if(tr.querySelector('.td-mat')) return;
+    const onclick = tr.getAttribute('onclick') || '';
+    const match = onclick.match(/'([^']+)'/);
+    if(!match) return;
+    const cir = mapaItems.find(c => c.id === match[1]);
+    const itens = cir ? (cir.itens_mapa || []) : [];
+    const total = itens.reduce((s,m) => s+(m.vtotal||0), 0);
+    const cells = tr.querySelectorAll('td');
+    const statusCell = cells[3];
+    if(!statusCell) return;
+    const tdM = document.createElement('td');
+    tdM.className = 'td-mat';
+    tdM.style.cssText = 'font-size:11px;color:var(--text2);';
+    tdM.textContent = itens.length ? itens.length+(itens.length===1?' item':' itens') : '—';
+    const tdV = document.createElement('td');
+    tdV.className = 'td-val';
+    tdV.style.cssText = 'font-size:11px;text-align:right;font-weight:600;color:var(--accent);';
+    tdV.textContent = total>0 ? 'R$ '+total.toLocaleString('pt-BR',{minimumFractionDigits:2}) : '—';
+    tr.insertBefore(tdV, statusCell);
+    tr.insertBefore(tdM, tdV);
+  });
+};
+
 function hideMapaAc(i){
   const w=document.getElementById('mi-ref-'+i);
   if(w){const p=w.closest('.ac-wrap');if(p){const l=p.querySelector('.ac-list');if(l)l.classList.remove('open');}}
