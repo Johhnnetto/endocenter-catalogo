@@ -1877,7 +1877,7 @@ function openMapaForm(id){
       <div class="fg"><label>ID</label><input type="text" id="mf-id" value="${m?.id||''}" readonly style="color:var(--text3)"></div>
       <div class="fg"><label>Data *</label><input type="date" id="mf-datacir" value="${m?.datacir||''}"></div>
       <div class="fg"><label>Hora</label><input type="time" id="mf-hora" value="${m?.hora||''}"></div>
-      <div class="fg"><label>Status</label><select id="mf-status">
+      <div class="fg"><label>Status</label><select id="mf-status-sel">
         ${['Eletivo','Urgência','Adiada','Cancelada','Realizado','Ag. Faturamento','Faturada'].map(s=>`<option ${m?.status===s?'selected':''}>${s}</option>`).join('')}
       </select></div>
     </div>
@@ -2062,7 +2062,7 @@ async function saveMapa(){
   // No required fields in mapa - all optional
   const obj={
     id:g('mf-id'), datacir:g('mf-datacir'), hora:g('mf-hora'),
-    status:g('mf-status')||'Eletivo', paciente:g('mf-pac'), medico:g('mf-med'),
+    status:g('mf-status-sel')||'Eletivo', paciente:g('mf-pac'), medico:g('mf-med'),
     assessora:g('mf-assessora'), hospital:g('mf-hospital'), convenio:g('mf-conv'),
     proc:g('mf-proc'), tipovic:g('mf-tipovic')||'', numcot:g('mf-numcot').trim().toUpperCase()||'', itens_mapa:collectMapaItems(), obs:g('mf-obs'),
   };
