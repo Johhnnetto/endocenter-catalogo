@@ -965,7 +965,7 @@ let params={dias:5, warn:3, bad:5};
 let editCotId=null, editMapaId=null, editUserId=null, editHospId=null, editMatId=null;
 let mapaView='grid';
 
-function getConfig(){ try{ return JSON.parse(localStorage.getItem(CFG_KEY)||'null'); }catch(e){ return null; } }
+function getConfig(){ try{ const c=JSON.parse(localStorage.getItem(CFG_KEY)||'null'); if(!c) return null; if(!c.bin && c.binId) c.bin=c.binId; if(!c.key && c.masterKey) c.key=c.masterKey; return c; }catch(e){ return null; } }
 function doConnect(){
   const key=document.getElementById('cfg-key').value.trim();
   const bin=document.getElementById('cfg-bin').value.trim();
