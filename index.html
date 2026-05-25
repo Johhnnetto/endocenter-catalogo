@@ -3188,6 +3188,43 @@ openMapaDetail = async function(id) {
 };
 
 
+
+// Fix: garantir que o binId seja sempre lido do localStorage
+(function() {
+  const _origGetConfig = getConfig;
+  const _fixCfg = function() {
+    const c = _origGetConfig();
+    // Suportar também formato antigo {key, bin}
+    if(!c.binId && c.bin) c.binId = c.bin;
+    if(!c.masterKey && c.key) c.masterKey = c.key;
+    return c;
+  };
+  window.getConfig = _fixCfg;
+})();
+
+// Fix: registrar login no log
+const _origDoLogin = doLogin;
+window.doLogin = async function(email, senha) {
+  await _origDoLogin(email, senha);
+  // Após login bem-sucedido, registrar no log
+  try {
+    const sess = JSON.parse(localStorage.getItem('ec_session') || '{}');
+    if(sess.nome) {
+      const dados = await apiRead();
+      dados.logs = dados.logs || [];
+      dados.logs.push({
+        ts: new Date().toISOString(),
+        user: sess.nome,
+        perfil: sess.role || 'user',
+        action: 'Login',
+        id: '',
+        detail: 'Acesso ao sistema'
+      });
+      await apiWrite(dados);
+    }
+  } catch(e) {}
+};
+
 function hideMapaAc(i){
   const w=document.getElementById('mi-ref-'+i);
   if(w){const p=w.closest('.ac-wrap');if(p){const l=p.querySelector('.ac-list');if(l)l.classList.remove('open');}}
